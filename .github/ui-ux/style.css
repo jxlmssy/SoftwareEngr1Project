@@ -1,0 +1,306 @@
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ffffff;
+    color: #25283a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 40px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 390px;
+    margin: auto;
+}
+
+.auth-card {
+    width: 100%;
+    padding: 32px 30px;
+    background: #ffffff;
+    border: 1px solid #e0e2e8;
+    border-radius: 8px;
+    box-shadow: 0 8px 28px rgba(20, 28, 70, 0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.auth-card h1 {
+    color: #25283a;
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: #85889a;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 28px;
+}
+
+form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 19px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #34374a;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    height: 45px;
+    padding: 0 13px;
+    background: #ffffff;
+    color: #25283a;
+    border: 1px solid #dfe1e9;
+    border-radius: 6px;
+    outline: none;
+    font-family: inherit;
+    font-size: 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input::placeholder {
+    color: #a1a4b2;
+}
+
+.form-group input:focus {
+    border-color: #343bbd;
+    box-shadow: 0 0 0 3px rgba(52, 59, 189, 0.09);
+}
+
+.form-group input.invalid {
+    border-color: #d93045;
+}
+
+.form-group input.valid {
+    border-color: #27945b;
+}
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    padding-right: 60px;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #343bbd;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.toggle-password:hover {
+    color: #1b218a;
+}
+
+.field-error {
+    display: block;
+    margin-top: 5px;
+    color: #d93045;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.field-error:empty {
+    display: none;
+}
+
+.form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 3px 0 23px;
+    font-size: 12px;
+}
+
+.remember-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6d7082;
+    cursor: pointer;
+}
+
+.remember-option input {
+    accent-color: #252ca5;
+    cursor: pointer;
+}
+
+.form-options a,
+.bottom-text a,
+.resend-code a {
+    color: #252ca5;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.form-options a:hover,
+.bottom-text a:hover,
+.resend-code a:hover {
+    text-decoration: underline;
+}
+
+.primary-button {
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 18px;
+    margin-top: 3px;
+    background: #252ca5;
+    color: #ffffff;
+    border: none;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.primary-button:hover {
+    background: #1c2289;
+}
+
+.primary-button:active {
+    transform: scale(0.98);
+}
+
+.primary-button:focus-visible,
+a:focus-visible,
+.toggle-password:focus-visible {
+    outline: 3px solid rgba(37, 44, 165, 0.3);
+    outline-offset: 3px;
+}
+
+.form-message {
+    margin-top: 13px;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.form-message:empty {
+    display: none;
+}
+
+.form-message.success {
+    color: #23834d;
+}
+
+.form-message.error {
+    color: #d93045;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 20px;
+    color: #999cad;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e6e7ed;
+}
+
+.bottom-text {
+    color: #777b8d;
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.resend-code {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 12px;
+    color: #777b8d;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.resend-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #252ca5;
+}
+
+.resend-code a {
+    display: inline;
+}
+
+.resend-message {
+    margin-top: 6px;
+    color: #23834d;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.resend-message:empty {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 18px 14px;
+    }
+
+    .auth-card {
+        padding: 28px 24px;
+    }
+
+    .auth-card h1 {
+        font-size: 23px;
+    }
+}
+
+@media (max-width: 350px) {
+    .auth-card {
+        padding: 24px 18px;
+    }
+
+    .form-options {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
