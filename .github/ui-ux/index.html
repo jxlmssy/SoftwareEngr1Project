@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="auth-container">
+
+        <section class="auth-card" id="loginScreen">
+            <h1>Log in</h1>
+            <p class="subtitle">To log in to your account, enter your username, email or phone number, and your password.</p>
+
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="loginUsername">Email or Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your email or username" autocomplete="username">
+                    <small class="field-error" id="loginUsernameError"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+                        <button type="button" class="toggle-password" data-target="loginPassword" aria-label="Show password">Show</button>
+                    </div>
+                    <small class="field-error" id="loginPasswordError"></small>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-option">
+                        <input type="checkbox" id="rememberMe">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" id="forgotPasswordLink">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="primary-button">Log In</button>
+                <p class="form-message" id="loginMessage" role="status"></p>
+            </form>
+
+            <div class="divider">
+                <span>NEW HERE?</span>
+            </div>
+
+            <p class="bottom-text">
+                Don't have an account?
+                <a href="#" id="showSignupLink">Create an account</a>
+            </p>
+        </section>
+
+        <section class="auth-card hidden" id="signupScreen">
+            <h1>Sign up</h1>
+            <p class="subtitle">To begin creating an account, fill up these.</p>
+
+            <form id="signupForm" novalidate>
+                <div class="form-group">
+                    <label for="signupUsername">Username</label>
+                    <input type="text" id="signupUsername" placeholder="Choose a username" autocomplete="username">
+                    <small class="field-error" id="signupUsernameError"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="signupEmail">Email Address</label>
+                    <input type="email" id="signupEmail" placeholder="Enter your email address" autocomplete="email">
+                    <small class="field-error" id="signupEmailError"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="signupPassword" placeholder="Create a password" autocomplete="new-password">
+                        <button type="button" class="toggle-password" data-target="signupPassword" aria-label="Show password">Show</button>
+                    </div>
+                    <small class="field-error" id="signupPasswordError"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password">
+                        <button type="button" class="toggle-password" data-target="confirmPassword" aria-label="Show password">Show</button>
+                    </div>
+                    <small class="field-error" id="confirmPasswordError"></small>
+                </div>
+
+                <button type="submit" class="primary-button">Create Account</button>
+                <p class="form-message" id="signupMessage" role="status"></p>
+            </form>
+
+            <div class="divider">
+                <span>ALREADY REGISTERED?</span>
+            </div>
+
+            <p class="bottom-text">
+                Already have an account?
+                <a href="#" id="showLoginFromSignup">Log in</a>
+            </p>
+        </section>
+
+        <section class="auth-card hidden" id="resetScreen">
+            <h1 id="resetHeading">Reset your password</h1>
+            <p class="subtitle" id="resetSubtitle">To begin resetting your password, enter your email address or username. We will send a code to your email address.</p>
+
+            <form id="resetForm" novalidate>
+                <div class="form-group" id="resetEmailGroup">
+                    <label for="resetEmail">Email Address</label>
+                    <input type="email" id="resetEmail" placeholder="Enter your registered email" autocomplete="email">
+                    <small class="field-error" id="resetEmailError"></small>
+                </div>
+
+                <div class="form-group hidden" id="resetCodeGroup">
+                    <label for="resetCode">Verification Code</label>
+                    <input type="text" id="resetCode" placeholder="Enter the verification code" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+                    <small class="field-error" id="resetCodeError"></small>
+
+                    <div class="resend-code">
+                        <svg class="resend-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 2v6h6"></path>
+                            <path d="M3 13a9 9 0 1 0 2.64-6.36L3 9"></path>
+                        </svg>
+                        <span>It may take a few minutes for you to get this code.</span>
+                        <a href="#" id="resendCodeLink">Get a new code.</a>
+                    </div>
+
+                    <p class="resend-message" id="resendMessage" role="status"></p>
+                </div>
+
+                <div class="form-group hidden" id="newPasswordGroup">
+                    <label for="newPassword">New Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="newPassword" placeholder="Enter your new password" autocomplete="new-password">
+                        <button type="button" class="toggle-password" data-target="newPassword" aria-label="Show password">Show</button>
+                    </div>
+                    <small class="field-error" id="newPasswordError"></small>
+                </div>
+
+                <div class="form-group hidden" id="confirmNewPasswordGroup">
+                    <label for="confirmNewPassword">Confirm New Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirmNewPassword" placeholder="Re-enter your new password" autocomplete="new-password">
+                        <button type="button" class="toggle-password" data-target="confirmNewPassword" aria-label="Show password">Show</button>
+                    </div>
+                    <small class="field-error" id="confirmNewPasswordError"></small>
+                </div>
+
+                <button type="submit" class="primary-button" id="resetSubmitButton">Send Code</button>
+                <p class="form-message" id="resetMessage" role="status"></p>
+            </form>
+
+            <div class="divider">
+                <span id="resetDividerText">REMEMBERED YOUR PASSWORD?</span>
+            </div>
+
+            <p class="bottom-text">
+                <a href="#" id="backToLoginLink">Back to Login</a>
+            </p>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
