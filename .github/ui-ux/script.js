@@ -1,4 +1,3 @@
-
 const loginScreen = document.getElementById("loginScreen");
 const signupScreen = document.getElementById("signupScreen");
 const resetScreen = document.getElementById("resetScreen");
