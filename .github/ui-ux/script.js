@@ -1,3 +1,15 @@
+<<<<<<< Updated upstream
+=======
+const SUPABASE_URL = "https://wrvjiltambowrfwchrzf.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bDzoROAD2nli0oKFPIxAlg_TRCTV5yC";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+console.log("Supabase client:", supabaseClient);
+
+>>>>>>> Stashed changes
 const loginScreen = document.getElementById("loginScreen");
 const signupScreen = document.getElementById("signupScreen");
 const resetScreen = document.getElementById("resetScreen");
@@ -209,7 +221,7 @@ document.getElementById("loginForm").addEventListener("submit", function (event)
     showMessage("loginMessage",
         "Logging in...",
         "success");
-});
+}); 
 
 document.getElementById("signupForm").addEventListener("submit", function (event) {
     event.preventDefault();
