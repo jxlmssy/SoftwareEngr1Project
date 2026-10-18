@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 const SUPABASE_URL = "https://wrvjiltambowrfwchrzf.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bDzoROAD2nli0oKFPIxAlg_TRCTV5yC";
 
@@ -9,7 +7,6 @@ const supabaseClient = supabase.createClient(
 );
 console.log("Supabase client:", supabaseClient);
 
->>>>>>> Stashed changes
 const loginScreen = document.getElementById("loginScreen");
 const signupScreen = document.getElementById("signupScreen");
 const resetScreen = document.getElementById("resetScreen");
