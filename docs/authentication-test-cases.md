@@ -240,4 +240,4 @@ Cases marked **Prototype** can check the current form behavior only. Cases marke
 - Confirm email verification, password policy beyond the prototype's 8-character minimum, session behavior, and sign-out behavior.
 - Confirm password-reset delivery, code/token format, expiry, single-use behavior, resend limits, and account-enumeration response policy.
 - Provide the Supabase schema and RLS policy/role matrix, including whether development signups really receive `superadmin` and what each role may access.
-- Confirm expected rate limiting or lockout behavior for login and reset requests.
+- Confirm expected rate limiting or lockout behavior for login and reset requests. 
