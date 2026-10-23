@@ -3,163 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication</title>
+    <title>Tiramis-u, Inc. ERP</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.3.0/index.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="auth-container">
 
-        <section class="auth-card" id="loginScreen">
-            <h1>Log in</h1>
-            <p class="subtitle">To log in to your account, enter your username, email or phone number, and your password.</p>
-
-            <form id="loginForm" novalidate>
-                <div class="form-group">
-                    <label for="loginUsername">Email or Username</label>
-                    <input type="text" id="loginUsername" placeholder="Enter your email or username" autocomplete="username">
-                    <small class="field-error" id="loginUsernameError"></small>
+    <div id="landingView">
+        <header class="navbar">
+            <div class="nav-container">
+                <div class="brand-container">
+                    <div class="brand-logo">T</div>
+                    <span class="brand-title">Tiramis-u, Inc. ERP</span>
                 </div>
+                <div class="nav-auth-buttons">
+                    <button type="button" class="btn-nav-signin" id="navSignInBtn">Sign in</button>
+                    <button type="button" class="btn-nav-register" id="navRegisterBtn">Register</button>
+                </div>
+            </div>
+        </header>
 
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
-                        <button type="button" class="toggle-password" data-target="loginPassword" aria-label="Show password">Show</button>
+        <main class="landing-page">
+            <section class="hero-section">
+                <div class="hero-left">
+                    <h1 class="hero-title">Tiramis-u</h1>
+                    <p class="hero-description">Manage sales, products, HR, and customer relationships in one place with Tiramis-u—built to empower teams big and small.</p>
+                    <div class="hero-actions">
+                        <button type="button" class="btn-hero-login" id="heroSignInBtn">Log In to Dashboard</button>
+                        <button type="button" class="btn-hero-register" id="heroRegisterBtn">Register</button>
                     </div>
-                    <small class="field-error" id="loginPasswordError"></small>
                 </div>
 
-                <div class="form-options">
-                    <label class="remember-option">
-                        <input type="checkbox" id="rememberMe">
-                        <span>Remember me</span>
-                    </label>
-                    <a href="#" id="forgotPasswordLink">Forgot password?</a>
+                <div class="hero-right">
+                    <div class="modules-grid">
+                        <div class="module-card card-blue card-interactive">
+                            <div class="icon-container icon-bg-blue">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            </div>
+                            <div class="module-text">
+                                <h3>Customers</h3>
+                                <p>Client management, account tracking, and support history.</p>
+                            </div>
+                        </div>
+                        <div class="module-card card-green card-interactive">
+                            <div class="icon-container icon-bg-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <div class="module-text">
+                                <h3>Human Resources</h3>
+                                <p>Team operations, talent management, and payroll.</p>
+                            </div>
+                        </div>
+                        <div class="module-card card-cream card-interactive">
+                            <div class="icon-container icon-bg-cream">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+                            </div>
+                            <div class="module-text">
+                                <h3>Products</h3>
+                                <p>Stock management, product listing, and fulfillment.</p>
+                            </div>
+                        </div>
+                        <div class="module-card card-orange card-interactive">
+                            <div class="icon-container icon-bg-orange">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                            </div>
+                            <div class="module-text">
+                                <h3>Sales</h3>
+                                <p>Transaction tracking, revenue performance, and pipeline.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="features-section-split">
+                <div class="features-carousel-left">
+                    <div class="coverflow-stage">
+                        <div class="coverflow-card card-blue" data-index="0">
+                            <div class="card-icon-wrapper icon-bg-blue">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            </div>
+                            <div class="card-body-content">
+                                <h3>Customers</h3>
+                                <p>Track leads, accounts, contacts, and interaction history.</p>
+                            </div>
+                        </div>
+                        <div class="coverflow-card card-green" data-index="1">
+                            <div class="card-icon-wrapper icon-bg-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <div class="card-body-content">
+                                <h3>Human Resources</h3>
+                                <p>Employee records, attendance, leave, and structure.</p>
+                            </div>
+                        </div>
+                        <div class="coverflow-card card-cream" data-index="2">
+                            <div class="card-icon-wrapper icon-bg-cream">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+                            </div>
+                            <div class="card-body-content">
+                                <h3>Products</h3>
+                                <p>Maintain product catalog, pricing, and stock levels.</p>
+                            </div>
+                        </div>
+                        <div class="coverflow-card card-orange" data-index="3">
+                            <div class="card-icon-wrapper icon-bg-orange">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                            </div>
+                            <div class="card-body-content">
+                                <h3>Sales</h3>
+                                <p>Quotes, orders, invoices, and real-time performance.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="carousel-controls">
+                        <button type="button" class="carousel-btn" id="prevSlideBtn">&#10094;</button>
+                        <div class="carousel-dots" id="carouselDots">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                        <button type="button" class="carousel-btn" id="nextSlideBtn">&#10095;</button>
+                    </div>
                 </div>
 
-                <button type="submit" class="primary-button">Log In</button>
-                <p class="form-message" id="loginMessage" role="status"></p>
-            </form>
+                <div class="features-text-right">
+                    <h2>Crafted for Modern Workflows</h2>
+                    <p>Seamlessly integrate your team, products, and revenue streams with an intuitive suite tailored for operational excellence.</p>
+                </div>
+            </section>
+        </main>
+    </div>
 
-            <div class="divider">
-                <span>NEW HERE?</span>
+    <div id="dashboardView" class="hidden">
+        <header class="dash-navbar">
+            <div class="dash-nav-left">
+                <div class="brand-container">
+                    <div class="brand-logo">T</div>
+                    <span class="brand-title">Tiramis-u, Inc. ERP</span>
+                </div>
+                <button type="button" class="window-toggle-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                </button>
+                <h2 class="dash-page-title">Dashboard</h2>
+            </div>
+            <div class="dash-nav-right">
+                <div class="user-chip">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="dashUserName">Google User</span>
+                </div>
+                <button type="button" class="logout-btn" id="logoutBtn" title="Log out">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="dash-container">
+            <aside class="dash-sidebar" id="dashSidebar">
+                <div class="sidebar-item active card-interactive">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Dashboard</span>
+                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </aside>
+
+            <main class="dash-content">
+                <div class="welcome-banner">
+                    <span>Welcome back, <strong id="bannerUserName">Google</strong>! ✏️</span>
+                </div>
+
+                <div class="dash-cards-grid">
+                    <div class="dash-card card-interactive">
+                        <div class="dash-card-header">
+                            <span class="dash-card-label">Total Customers:</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        </div>
+                        <div class="dash-card-stat">9</div>
+                        <div class="stat-badge green-badge">8 active</div>
+                    </div>
+
+                    <div class="dash-card card-interactive">
+                        <div class="dash-card-header">
+                            <span class="dash-card-label">Total Revenue:</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <div class="dash-card-stat">₱68,4k</div>
+                        <div class="stat-trend-row">
+                            <span class="stat-badge green-badge">39.15%</span>
+                            <span class="trend-sub">from last month</span>
+                        </div>
+                    </div>
+
+                    <div class="dash-card card-interactive">
+                        <div class="dash-card-header">
+                            <span class="dash-card-label">Products:</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        </div>
+                        <div class="dash-card-stat">219</div>
+                        <div class="stat-trend-row">
+                            <span class="stat-badge green-badge">24.27%</span>
+                            <span class="trend-sub">this week</span>
+                        </div>
+                    </div>
+
+                    <div class="dash-card card-interactive">
+                        <div class="dash-card-header">
+                            <span class="dash-card-label">Open orders:</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        </div>
+                        <div class="dash-card-stat">61</div>
+                        <div class="stat-trend-row">
+                            <span class="stat-badge green-badge">17.87%</span>
+                            <span class="trend-sub">from last week</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="authModalOverlay">
+        <div class="modal-card">
+            <button type="button" class="modal-close-btn" id="closeModalBtn">&times;</button>
+
+            <div class="auth-screen" id="signInScreen">
+                <h1 class="modal-title-main">Log in</h1>
+                <p class="modal-subtitle">To log in to your account, enter your credentials.</p>
+
+                <form id="signInForm" novalidate>
+                    <div class="form-group">
+                        <label for="signInEmail">Email or Username</label>
+                        <input type="text" id="signInEmail" placeholder="Enter email or username" autocomplete="username">
+                        <small class="field-error" id="signInEmailError"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signInPassword">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="signInPassword" placeholder="Enter password" autocomplete="current-password">
+                            <button type="button" class="toggle-password" data-target="signInPassword">Show</button>
+                        </div>
+                        <small class="field-error" id="signInPasswordError"></small>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me"><input type="checkbox" id="rememberMe"> <span>Remember me</span></label>
+                        <a href="#" id="forgotPasswordLink">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="primary-modal-btn">Log In</button>
+                    <p class="form-message" id="signInMessage"></p>
+                </form>
+
+                <div class="or-divider"><span>NEW HERE?</span></div>
+
+                <button type="button" class="google-btn" id="googleBtnSignIn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="16" height="16">
+                        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                <p class="switch-mode-text">Don't have an account? <a href="#" id="switchToRegisterLink">Create an account</a></p>
             </div>
 
-            <p class="bottom-text">
-                Don't have an account?
-                <a href="#" id="showSignupLink">Create an account</a>
-            </p>
-        </section>
+            <div class="auth-screen hidden" id="registerScreen">
+                <h2 class="modal-title-main">Sign up</h2>
+                <p class="modal-subtitle">Fill out the fields to create your account.</p>
 
-        <section class="auth-card hidden" id="signupScreen">
-            <h1>Sign up</h1>
-            <p class="subtitle">To begin creating an account, fill up these.</p>
-
-            <form id="signupForm" novalidate>
-                <div class="form-group">
-                    <label for="signupUsername">Username</label>
-                    <input type="text" id="signupUsername" placeholder="Choose a username" autocomplete="username">
-                    <small class="field-error" id="signupUsernameError"></small>
-                </div>
-
-                <div class="form-group">
-                    <label for="signupEmail">Email Address</label>
-                    <input type="email" id="signupEmail" placeholder="Enter your email address" autocomplete="email">
-                    <small class="field-error" id="signupEmailError"></small>
-                </div>
-
-                <div class="form-group">
-                    <label for="signupPassword">Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="signupPassword" placeholder="Create a password" autocomplete="new-password">
-                        <button type="button" class="toggle-password" data-target="signupPassword" aria-label="Show password">Show</button>
+                <form id="registerForm" novalidate>
+                    <div class="form-group">
+                        <label for="registerUsername">Username</label>
+                        <input type="text" id="registerUsername" placeholder="Choose username" autocomplete="username">
+                        <small class="field-error" id="registerUsernameError"></small>
                     </div>
-                    <small class="field-error" id="signupPasswordError"></small>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password">
-                        <button type="button" class="toggle-password" data-target="confirmPassword" aria-label="Show password">Show</button>
+                    <div class="form-group">
+                        <label for="registerEmail">Email Address</label>
+                        <input type="email" id="registerEmail" placeholder="Enter email" autocomplete="email">
+                        <small class="field-error" id="registerEmailError"></small>
                     </div>
-                    <small class="field-error" id="confirmPasswordError"></small>
-                </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="registerPassword" placeholder="Create password" autocomplete="new-password">
+                            <button type="button" class="toggle-password" data-target="registerPassword">Show</button>
+                        </div>
+                        <small class="field-error" id="registerPasswordError"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirmPassword" placeholder="Re-enter password" autocomplete="new-password">
+                            <button type="button" class="toggle-password" data-target="confirmPassword">Show</button>
+                        </div>
+                        <small class="field-error" id="confirmPasswordError"></small>
+                    </div>
 
-                <button type="submit" class="primary-button">Create Account</button>
-                <p class="form-message" id="signupMessage" role="status"></p>
-            </form>
+                    <button type="submit" class="primary-modal-btn">Create Account</button>
+                    <p class="form-message" id="registerMessage"></p>
+                </form>
 
-            <div class="divider">
-                <span>ALREADY REGISTERED?</span>
+                <div class="or-divider"><span>OR CONTINUE WITH</span></div>
+                <button type="button" class="google-btn" id="googleBtnRegister">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="16" height="16">
+                        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                <p class="switch-mode-text">Already have an account? <a href="#" id="switchToSignInLink">Log in</a></p>
             </div>
 
-            <p class="bottom-text">
-                Already have an account?
-                <a href="#" id="showLoginFromSignup">Log in</a>
-            </p>
-        </section>
+            <div class="auth-screen hidden" id="resetScreen">
+                <h2 class="modal-title-main" id="resetHeading">Reset password</h2>
+                <p class="modal-subtitle" id="resetSubtitle">Enter your email or username to receive a reset code.</p>
 
-        <section class="auth-card hidden" id="resetScreen">
-            <h1 id="resetHeading">Reset your password</h1>
-            <p class="subtitle" id="resetSubtitle">To begin resetting your password, enter your email address or username. We will send a code to your email address.</p>
-
-            <form id="resetForm" novalidate>
-                <div class="form-group" id="resetEmailGroup">
-                    <label for="resetEmail">Email Address</label>
-                    <input type="email" id="resetEmail" placeholder="Enter your registered email" autocomplete="email">
-                    <small class="field-error" id="resetEmailError"></small>
-                </div>
-
-                <div class="form-group hidden" id="resetCodeGroup">
-                    <label for="resetCode">Verification Code</label>
-                    <input type="text" id="resetCode" placeholder="Enter the verification code" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
-                    <small class="field-error" id="resetCodeError"></small>
-
-                    <div class="resend-code">
-                        <svg class="resend-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M3 2v6h6"></path>
-                            <path d="M3 13a9 9 0 1 0 2.64-6.36L3 9"></path>
-                        </svg>
-                        <span>It may take a few minutes for you to get this code.</span>
-                        <a href="#" id="resendCodeLink">Get a new code.</a>
+                <form id="resetForm" novalidate>
+                    <div class="form-group" id="resetEmailGroup">
+                        <label for="resetEmail">Email Address</label>
+                        <input type="email" id="resetEmail" placeholder="Enter registered email" autocomplete="email">
+                        <small class="field-error" id="resetEmailError"></small>
+                    </div>
+                    <div class="form-group hidden" id="resetCodeGroup">
+                        <label for="resetCode">Verification Code</label>
+                        <input type="text" id="resetCode" placeholder="6-digit code" maxlength="6">
+                        <small class="field-error" id="resetCodeError"></small>
+                        <div class="resend-code"><span>Didn't get code?</span> <a href="#" id="resendCodeLink">Resend</a></div>
+                        <p class="resend-message" id="resendMessage"></p>
+                    </div>
+                    <div class="form-group hidden" id="newPasswordGroup">
+                        <label for="newPassword">New Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="newPassword" placeholder="New password">
+                            <button type="button" class="toggle-password" data-target="newPassword">Show</button>
+                        </div>
+                        <small class="field-error" id="newPasswordError"></small>
+                    </div>
+                    <div class="form-group hidden" id="confirmNewPasswordGroup">
+                        <label for="confirmNewPassword">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirmNewPassword" placeholder="Confirm password">
+                            <button type="button" class="toggle-password" data-target="confirmNewPassword">Show</button>
+                        </div>
+                        <small class="field-error" id="confirmNewPasswordError"></small>
                     </div>
 
-                    <p class="resend-message" id="resendMessage" role="status"></p>
-                </div>
+                    <button type="submit" class="primary-modal-btn" id="resetSubmitButton">Send Code</button>
+                    <p class="form-message" id="resetMessage"></p>
+                </form>
 
-                <div class="form-group hidden" id="newPasswordGroup">
-                    <label for="newPassword">New Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="newPassword" placeholder="Enter your new password" autocomplete="new-password">
-                        <button type="button" class="toggle-password" data-target="newPassword" aria-label="Show password">Show</button>
-                    </div>
-                    <small class="field-error" id="newPasswordError"></small>
-                </div>
-
-                <div class="form-group hidden" id="confirmNewPasswordGroup">
-                    <label for="confirmNewPassword">Confirm New Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="confirmNewPassword" placeholder="Re-enter your new password" autocomplete="new-password">
-                        <button type="button" class="toggle-password" data-target="confirmNewPassword" aria-label="Show password">Show</button>
-                    </div>
-                    <small class="field-error" id="confirmNewPasswordError"></small>
-                </div>
-
-                <button type="submit" class="primary-button" id="resetSubmitButton">Send Code</button>
-                <p class="form-message" id="resetMessage" role="status"></p>
-            </form>
-
-            <div class="divider">
-                <span id="resetDividerText">REMEMBERED YOUR PASSWORD?</span>
+                <div class="or-divider"><span>REMEMBER PASSWORD?</span></div>
+                <p class="switch-mode-text"><a href="#" id="backToSignInLink">Back to Login</a></p>
             </div>
-
-            <p class="bottom-text">
-                <a href="#" id="backToLoginLink">Back to Login</a>
-            </p>
-        </section>
-
-    </main>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 
