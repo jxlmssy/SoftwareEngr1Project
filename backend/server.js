@@ -9,7 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Supabase connection
 console.log("Supabase URL:", process.env.SUPABASE_URL);
 
 const supabase = createClient(
@@ -19,7 +18,6 @@ const supabase = createClient(
 
 console.log("Supabase REST URL:", supabase.rest.url);
 
-// Test API
 app.get("/api/test", async (req, res) => {
     const { data, error } = await supabase
         .from("app_user")
@@ -40,7 +38,6 @@ app.get("/api/test", async (req, res) => {
     });
 });
 
-// Start server
 const PORT = 3000;
 
 app.listen(PORT, () => {
