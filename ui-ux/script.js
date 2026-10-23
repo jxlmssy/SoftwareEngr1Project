@@ -1,3 +1,4 @@
+<<<<<<< HEAD:ui-ux/script.js
 <<<<<<< HEAD:.github/ui-ux/script.js
 const SUPABASE_URL = "https://wrvjiltambowrfwchrzf.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bDzoROAD2nli0oKFPIxAlg_TRCTV5yC";
@@ -10,6 +11,9 @@ console.log("Supabase client:", supabaseClient);
 
 =======
 >>>>>>> 5c9f811 (Move UI files and add backend setup):ui-ux/script.js
+=======
+
+>>>>>>> origin/main:.github/ui-ux/script.js
 const loginScreen = document.getElementById("loginScreen");
 const signupScreen = document.getElementById("signupScreen");
 const resetScreen = document.getElementById("resetScreen");
