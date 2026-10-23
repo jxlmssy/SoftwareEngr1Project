@@ -1,33 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
     const landingView = document.getElementById("landingView");
     const dashboardView = document.getElementById("dashboardView");
-
     const authModalOverlay = document.getElementById("authModalOverlay");
     const closeModalBtn = document.getElementById("closeModalBtn");
 
     const signInScreen = document.getElementById("signInScreen");
     const registerScreen = document.getElementById("registerScreen");
     const resetScreen = document.getElementById("resetScreen");
-
-    const navSignInBtn = document.getElementById("navSignInBtn");
-    const navRegisterBtn = document.getElementById("navRegisterBtn");
-    const heroSignInBtn = document.getElementById("heroSignInBtn");
-    const heroRegisterBtn = document.getElementById("heroRegisterBtn");
-
-    const googleBtnSignIn = document.getElementById("googleBtnSignIn");
-    const googleBtnRegister = document.getElementById("googleBtnRegister");
-
-    const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
-    const dashSidebar = document.getElementById("dashSidebar");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    const dashUserName = document.getElementById("dashUserName");
-    const bannerUserName = document.getElementById("bannerUserName");
-
-    const switchToRegisterLink = document.getElementById("switchToRegisterLink");
-    const switchToSignInLink = document.getElementById("switchToSignInLink");
-    const forgotPasswordLink = document.getElementById("forgotPasswordLink");
-    const backToSignInLink = document.getElementById("backToSignInLink");
 
     const coverCards = document.querySelectorAll(".coverflow-card");
     const prevSlideBtn = document.getElementById("prevSlideBtn");
@@ -39,7 +18,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateCoverflow() {
         coverCards.forEach((card, index) => {
             let offset = index - activeCardIndex;
-
             if (offset < -1 && offset < totalCards / -2) offset += totalCards;
             if (offset > 1 && offset > totalCards / 2) offset -= totalCards;
 
@@ -49,112 +27,56 @@ document.addEventListener("DOMContentLoaded", function () {
             else if (offset === 1) card.classList.add("pos-1");
             else card.classList.add("pos-hidden");
         });
-
-        dots.forEach((dot, index) => {
-            if (index === activeCardIndex) dot.classList.add("active");
-            else dot.classList.remove("active");
-        });
+        dots.forEach((dot, index) => dot.classList.toggle("active", index === activeCardIndex));
     }
 
     if (coverCards.length > 0) {
         updateCoverflow();
-
-        coverCards.forEach((card, index) => {
-            card.addEventListener("click", () => {
-                activeCardIndex = index;
-                updateCoverflow();
-            });
-        });
-
-        if (nextSlideBtn && prevSlideBtn) {
-            nextSlideBtn.addEventListener("click", () => {
-                activeCardIndex = (activeCardIndex + 1) % totalCards;
-                updateCoverflow();
-            });
-
-            prevSlideBtn.addEventListener("click", () => {
-                activeCardIndex = (activeCardIndex - 1 + totalCards) % totalCards;
-                updateCoverflow();
-            });
-        }
-
-        dots.forEach(dot => {
-            dot.addEventListener("click", (e) => {
-                activeCardIndex = parseInt(e.target.dataset.index, 10);
-                updateCoverflow();
-            });
-        });
-
-        setInterval(() => {
-            activeCardIndex = (activeCardIndex + 1) % totalCards;
-            updateCoverflow();
-        }, 4500);
+        coverCards.forEach((card, i) => card.addEventListener("click", () => { activeCardIndex = i; updateCoverflow(); }));
+        if (nextSlideBtn) nextSlideBtn.addEventListener("click", () => { activeCardIndex = (activeCardIndex + 1) % totalCards; updateCoverflow(); });
+        if (prevSlideBtn) prevSlideBtn.addEventListener("click", () => { activeCardIndex = (activeCardIndex - 1 + totalCards) % totalCards; updateCoverflow(); });
+        dots.forEach((dot, i) => dot.addEventListener("click", () => { activeCardIndex = i; updateCoverflow(); }));
+        setInterval(() => { activeCardIndex = (activeCardIndex + 1) % totalCards; updateCoverflow(); }, 4500);
     }
 
     let resetStep = "email";
+    const signInFields = [{ input: "signInEmail", error: "signInEmailError" }, { input: "signInPassword", error: "signInPasswordError" }];
+    const registerFields = [{ input: "registerUsername", error: "registerUsernameError" }, { input: "registerEmail", error: "registerEmailError" }, { input: "registerPassword", error: "registerPasswordError" }, { input: "confirmPassword", error: "confirmPasswordError" }];
+    const resetFields = [{ input: "resetEmail", error: "resetEmailError" }, { input: "resetCode", error: "resetCodeError" }, { input: "newPassword", error: "newPasswordError" }, { input: "confirmNewPassword", error: "confirmNewPasswordError" }];
 
-    const signInFields = [
-        { input: "signInEmail", error: "signInEmailError" },
-        { input: "signInPassword", error: "signInPasswordError" }
-    ];
-
-    const registerFields = [
-        { input: "registerUsername", error: "registerUsernameError" },
-        { input: "registerEmail", error: "registerEmailError" },
-        { input: "registerPassword", error: "registerPasswordError" },
-        { input: "confirmPassword", error: "confirmPasswordError" }
-    ];
-
-    const resetFields = [
-        { input: "resetEmail", error: "resetEmailError" },
-        { input: "resetCode", error: "resetCodeError" },
-        { input: "newPassword", error: "newPasswordError" },
-        { input: "confirmNewPassword", error: "confirmNewPasswordError" }
-    ];
-
-    function openModal(screenToShow) {
+    function openModal(screen) {
         authModalOverlay.classList.remove("hidden");
-        showScreen(screenToShow);
+        showScreen(screen);
         document.body.style.overflow = "hidden";
     }
 
     function closeModal() {
         authModalOverlay.classList.add("hidden");
         document.body.style.overflow = "";
-        clearAllFieldErrors();
-        clearAllMessages();
+        clearErrors([...signInFields, ...registerFields, ...resetFields]);
     }
 
     function showScreen(screen) {
         [signInScreen, registerScreen, resetScreen].forEach(s => s.classList.add("hidden"));
         screen.classList.remove("hidden");
-
-        clearAllFieldErrors();
-        clearAllMessages();
-
         if (screen === resetScreen) {
             resetStep = "email";
             document.getElementById("resetHeading").textContent = "Reset your password";
-            document.getElementById("resetSubtitle").textContent = "To begin resetting your password, enter your email address or username. We will send a code to your email address.";
+            document.getElementById("resetSubtitle").textContent = "Enter your email address or username to receive a code.";
             document.getElementById("resetEmailGroup").classList.remove("hidden");
             document.getElementById("resetCodeGroup").classList.add("hidden");
             document.getElementById("newPasswordGroup").classList.add("hidden");
             document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
             document.getElementById("resetSubmitButton").textContent = "Send Code";
-
             document.getElementById("resetEmail").disabled = false;
-            document.getElementById("resetEmail").value = "";
-            document.getElementById("resetCode").value = "";
-            document.getElementById("newPassword").value = "";
-            document.getElementById("confirmNewPassword").value = "";
+            document.getElementById("resetForm").reset();
         }
     }
 
-    function navigateToDashboard(userDisplayName) {
-        const name = userDisplayName || "Google User";
-        dashUserName.textContent = name;
-        bannerUserName.textContent = name.split(" ")[0];
-
+    function navigateToDashboard(name) {
+        const userName = name || "Google User";
+        document.getElementById("dashUserName").textContent = userName;
+        document.getElementById("bannerUserName").textContent = userName.split(" ")[0];
         closeModal();
         landingView.classList.add("hidden");
         dashboardView.classList.remove("hidden");
@@ -167,300 +89,146 @@ document.addEventListener("DOMContentLoaded", function () {
         window.scrollTo(0, 0);
     }
 
-    function showFieldError(inputId, errorId, message) {
-        const input = document.getElementById(inputId);
-        const error = document.getElementById(errorId);
-
-        input.classList.add("invalid");
-        input.classList.remove("valid");
-        error.textContent = message;
+    function setFieldError(inputId, errorId, msg) {
+        document.getElementById(inputId).classList.add("invalid");
+        document.getElementById(inputId).classList.remove("valid");
+        document.getElementById(errorId).textContent = msg;
     }
 
     function clearFieldError(inputId, errorId) {
-        const input = document.getElementById(inputId);
-        const error = document.getElementById(errorId);
-
-        input.classList.remove("invalid");
-        error.textContent = "";
+        document.getElementById(inputId).classList.remove("invalid");
+        document.getElementById(errorId).textContent = "";
     }
 
-    function markFieldValid(inputId, errorId) {
-        const input = document.getElementById(inputId);
-        const error = document.getElementById(errorId);
-
-        input.classList.remove("invalid");
-        input.classList.add("valid");
-        error.textContent = "";
+    function setFieldValid(inputId, errorId) {
+        document.getElementById(inputId).classList.remove("invalid");
+        document.getElementById(inputId).classList.add("valid");
+        document.getElementById(errorId).textContent = "";
     }
 
-    function showMessage(messageId, message, type) {
-        const element = document.getElementById(messageId);
-        element.textContent = message;
-        element.className = "form-message " + type;
-    }
-
-    function clearMessage(messageId) {
-        const element = document.getElementById(messageId);
-        element.textContent = "";
-        element.className = "form-message";
-    }
-
-    function clearFormErrors(fields) {
-        fields.forEach(field => {
-            clearFieldError(field.input, field.error);
-            document.getElementById(field.input).classList.remove("valid");
+    function clearErrors(fields) {
+        fields.forEach(f => {
+            clearFieldError(f.input, f.error);
+            document.getElementById(f.input).classList.remove("valid");
         });
     }
 
-    function clearAllFieldErrors() {
-        clearFormErrors(signInFields);
-        clearFormErrors(registerFields);
-        clearFormErrors(resetFields);
-    }
+    const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    function clearAllMessages() {
-        clearMessage("signInMessage");
-        clearMessage("registerMessage");
-        clearMessage("resetMessage");
-        document.getElementById("resendMessage").textContent = "";
-    }
-
-    function isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-    navSignInBtn.addEventListener("click", () => openModal(signInScreen));
-    heroSignInBtn.addEventListener("click", () => openModal(signInScreen));
-
-    navRegisterBtn.addEventListener("click", () => openModal(registerScreen));
-    heroRegisterBtn.addEventListener("click", () => openModal(registerScreen));
-
+    document.getElementById("navSignInBtn").addEventListener("click", () => openModal(signInScreen));
+    document.getElementById("heroSignInBtn").addEventListener("click", () => openModal(signInScreen));
+    document.getElementById("navRegisterBtn").addEventListener("click", () => openModal(registerScreen));
+    document.getElementById("heroRegisterBtn").addEventListener("click", () => openModal(registerScreen));
     closeModalBtn.addEventListener("click", closeModal);
+    authModalOverlay.addEventListener("click", e => { if (e.target === authModalOverlay) closeModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-    authModalOverlay.addEventListener("click", function (event) {
-        if (event.target === authModalOverlay) {
-            closeModal();
-        }
-    });
+    document.getElementById("googleBtnSignIn").addEventListener("click", () => navigateToDashboard("Google User"));
+    document.getElementById("googleBtnRegister").addEventListener("click", () => navigateToDashboard("Google User"));
+    document.getElementById("sidebarToggleBtn").addEventListener("click", () => dashboardView.querySelector(".dash-sidebar").classList.toggle("collapsed"));
+    document.getElementById("logoutBtn").addEventListener("click", navigateToLanding);
 
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && !authModalOverlay.classList.contains("hidden")) {
-            closeModal();
-        }
-    });
+    document.getElementById("switchToRegisterLink").addEventListener("click", e => { e.preventDefault(); showScreen(registerScreen); });
+    document.getElementById("switchToSignInLink").addEventListener("click", e => { e.preventDefault(); showScreen(signInScreen); });
+    document.getElementById("forgotPasswordLink").addEventListener("click", e => { e.preventDefault(); showScreen(resetScreen); });
+    document.getElementById("backToSignInLink").addEventListener("click", e => { e.preventDefault(); showScreen(signInScreen); });
 
-    googleBtnSignIn.addEventListener("click", () => navigateToDashboard("Google User"));
-    googleBtnRegister.addEventListener("click", () => navigateToDashboard("Google User"));
-
-    sidebarToggleBtn.addEventListener("click", function () {
-        dashSidebar.classList.toggle("collapsed");
-    });
-
-    logoutBtn.addEventListener("click", function () {
-        navigateToLanding();
-    });
-
-    switchToRegisterLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        showScreen(registerScreen);
-    });
-
-    switchToSignInLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        showScreen(signInScreen);
-    });
-
-    forgotPasswordLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        showScreen(resetScreen);
-    });
-
-    backToSignInLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        showScreen(signInScreen);
-    });
-
-    document.querySelectorAll(".toggle-password").forEach(button => {
-        button.addEventListener("click", function () {
-            const input = document.getElementById(button.dataset.target);
-            if (input.type === "password") {
-                input.type = "text";
-                button.textContent = "Hide";
-            } else {
-                input.type = "password";
-                button.textContent = "Show";
-            }
+    document.querySelectorAll(".toggle-password").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const input = document.getElementById(btn.dataset.target);
+            input.type = input.type === "password" ? "text" : "password";
+            btn.textContent = input.type === "password" ? "Show" : "Hide";
         });
     });
 
-    [...signInFields, ...registerFields, ...resetFields].forEach(field => {
-        const input = document.getElementById(field.input);
-        if (input) {
-            input.addEventListener("input", () => clearFieldError(field.input, field.error));
+    [...signInFields, ...registerFields, ...resetFields].forEach(f => {
+        const input = document.getElementById(f.input);
+        if (input) input.addEventListener("input", () => clearFieldError(f.input, f.error));
+    });
+
+    document.getElementById("signInForm").addEventListener("submit", e => {
+        e.preventDefault();
+        clearErrors(signInFields);
+        const id = document.getElementById("signInEmail").value.trim();
+        const pwd = document.getElementById("signInPassword").value;
+        let valid = true;
+
+        if (!id) { setFieldError("signInEmail", "signInEmailError", "Enter your email or username."); valid = false; }
+        else setFieldValid("signInEmail", "signInEmailError");
+
+        if (!pwd) { setFieldError("signInPassword", "signInPasswordError", "Enter your password."); valid = false; }
+        else setFieldValid("signInPassword", "signInPasswordError");
+
+        if (valid) {
+            document.getElementById("signInMessage").textContent = "Logging in...";
+            document.getElementById("signInMessage").className = "form-message success";
+            setTimeout(() => navigateToDashboard(id.includes("@") ? id.split("@")[0] : id), 600);
         }
     });
 
-    document.getElementById("signInForm").addEventListener("submit", function (e) {
+    document.getElementById("registerForm").addEventListener("submit", e => {
         e.preventDefault();
-        clearFormErrors(signInFields);
-        clearMessage("signInMessage");
-
-        const identifier = document.getElementById("signInEmail").value.trim();
-        const password = document.getElementById("signInPassword").value;
-        let isValid = true;
-
-        if (!identifier) {
-            showFieldError("signInEmail", "signInEmailError", "Please enter your email or username.");
-            isValid = false;
-        } else if (identifier.includes("@") && !isValidEmail(identifier)) {
-            showFieldError("signInEmail", "signInEmailError", "Please enter a valid email address.");
-            isValid = false;
-        } else {
-            markFieldValid("signInEmail", "signInEmailError");
-        }
-
-        if (!password.trim()) {
-            showFieldError("signInPassword", "signInPasswordError", "Please enter your password.");
-            isValid = false;
-        } else {
-            markFieldValid("signInPassword", "signInPasswordError");
-        }
-
-        if (isValid) {
-            showMessage("signInMessage", "Logging in...", "success");
-            setTimeout(() => {
-                navigateToDashboard(identifier.includes("@") ? identifier.split("@")[0] : identifier);
-            }, 600);
-        }
-    });
-
-    document.getElementById("registerForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-        clearFormErrors(registerFields);
-        clearMessage("registerMessage");
-
-        const username = document.getElementById("registerUsername").value.trim();
+        clearErrors(registerFields);
+        const user = document.getElementById("registerUsername").value.trim();
         const email = document.getElementById("registerEmail").value.trim();
-        const password = document.getElementById("registerPassword").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
-        let isValid = true;
+        const pwd = document.getElementById("registerPassword").value;
+        const cpwd = document.getElementById("confirmPassword").value;
+        let valid = true;
 
-        if (!username) {
-            showFieldError("registerUsername", "registerUsernameError", "Please enter a username.");
-            isValid = false;
-        } else if (username.length < 3) {
-            showFieldError("registerUsername", "registerUsernameError", "Username must be at least 3 characters long.");
-            isValid = false;
-        } else {
-            markFieldValid("registerUsername", "registerUsernameError");
-        }
+        if (!user || user.length < 3) { setFieldError("registerUsername", "registerUsernameError", "Min 3 characters required."); valid = false; }
+        else setFieldValid("registerUsername", "registerUsernameError");
 
-        if (!email) {
-            showFieldError("registerEmail", "registerEmailError", "Please enter your email address.");
-            isValid = false;
-        } else if (!isValidEmail(email)) {
-            showFieldError("registerEmail", "registerEmailError", "Please enter a valid email address.");
-            isValid = false;
-        } else {
-            markFieldValid("registerEmail", "registerEmailError");
-        }
+        if (!isValidEmail(email)) { setFieldError("registerEmail", "registerEmailError", "Enter a valid email."); valid = false; }
+        else setFieldValid("registerEmail", "registerEmailError");
 
-        if (!password) {
-            showFieldError("registerPassword", "registerPasswordError", "Please create a password.");
-            isValid = false;
-        } else if (password.length < 8) {
-            showFieldError("registerPassword", "registerPasswordError", "Password must be at least 8 characters long.");
-            isValid = false;
-        } else {
-            markFieldValid("registerPassword", "registerPasswordError");
-        }
+        if (!pwd || pwd.length < 8) { setFieldError("registerPassword", "registerPasswordError", "Min 8 characters required."); valid = false; }
+        else setFieldValid("registerPassword", "registerPasswordError");
 
-        if (!confirmPassword) {
-            showFieldError("confirmPassword", "confirmPasswordError", "Please confirm your password.");
-            isValid = false;
-        } else if (password !== confirmPassword) {
-            showFieldError("confirmPassword", "confirmPasswordError", "Passwords do not match.");
-            isValid = false;
-        } else {
-            markFieldValid("confirmPassword", "confirmPasswordError");
-        }
+        if (pwd !== cpwd) { setFieldError("confirmPassword", "confirmPasswordError", "Passwords do not match."); valid = false; }
+        else setFieldValid("confirmPassword", "confirmPasswordError");
 
-        if (isValid) {
+        if (valid) {
             showScreen(signInScreen);
-            showMessage("signInMessage", "Your account has been successfully created. Log in now.", "success");
+            document.getElementById("signInMessage").textContent = "Account created successfully. Log in now.";
+            document.getElementById("signInMessage").className = "form-message success";
         }
     });
 
-    document.getElementById("resetForm").addEventListener("submit", function (e) {
+    document.getElementById("resetForm").addEventListener("submit", e => {
         e.preventDefault();
-        clearMessage("resetMessage");
-
         if (resetStep === "email") {
-            clearFormErrors([{ input: "resetEmail", error: "resetEmailError" }]);
             const email = document.getElementById("resetEmail").value.trim();
-
-            if (!email) {
-                showFieldError("resetEmail", "resetEmailError", "Please enter your email address.");
-                return;
-            }
-            if (email.includes("@") && !isValidEmail(email)) {
-                showFieldError("resetEmail", "resetEmailError", "Please enter a valid email address.");
-                return;
-            }
-
-            markFieldValid("resetEmail", "resetEmailError");
+            if (!isValidEmail(email)) { setFieldError("resetEmail", "resetEmailError", "Enter valid email."); return; }
+            setFieldValid("resetEmail", "resetEmailError");
             resetStep = "code";
-
             document.getElementById("resetEmail").disabled = true;
             document.getElementById("resetCodeGroup").classList.remove("hidden");
-            document.getElementById("resetSubtitle").textContent = "Enter the verification code sent to your email address.";
+            document.getElementById("resetSubtitle").textContent = "Enter the 6-digit code sent to your email.";
             document.getElementById("resetSubmitButton").textContent = "Verify Code";
-            showMessage("resetMessage", "Email validated. Enter the verification code sent to your email address.", "success");
-            return;
-        }
-
-        if (resetStep === "code") {
-            clearFormErrors([{ input: "resetCode", error: "resetCodeError" }]);
+        } else if (resetStep === "code") {
             const code = document.getElementById("resetCode").value.trim();
-
-            if (!code || !/^\d{6}$/.test(code)) {
-                showFieldError("resetCode", "resetCodeError", "Please enter a valid 6-digit verification code.");
-                return;
-            }
-
-            markFieldValid("resetCode", "resetCodeError");
+            if (!/^\d{6}$/.test(code)) { setFieldError("resetCode", "resetCodeError", "Enter 6-digit code."); return; }
+            setFieldValid("resetCode", "resetCodeError");
             resetStep = "password";
-
             document.getElementById("resetHeading").textContent = "Create new password";
-            document.getElementById("resetSubtitle").textContent = "Create a new password and confirm it to finish resetting your password.";
-            document.getElementById("resetEmailGroup").classList.add("hidden");
+            document.getElementById("resetSubtitle").textContent = "Enter and confirm your new password.";
             document.getElementById("resetCodeGroup").classList.add("hidden");
             document.getElementById("newPasswordGroup").classList.remove("hidden");
             document.getElementById("confirmNewPasswordGroup").classList.remove("hidden");
             document.getElementById("resetSubmitButton").textContent = "Continue Logging In";
-            return;
-        }
-
-        if (resetStep === "password") {
-            const newPassword = document.getElementById("newPassword").value;
-            const confirmNewPassword = document.getElementById("confirmNewPassword").value;
-
-            if (newPassword.length < 8) {
-                showFieldError("newPassword", "newPasswordError", "Password must be at least 8 characters long.");
-                return;
-            }
-            if (newPassword !== confirmNewPassword) {
-                showFieldError("confirmNewPassword", "confirmNewPasswordError", "Passwords do not match.");
-                return;
-            }
-
+        } else if (resetStep === "password") {
+            const npwd = document.getElementById("newPassword").value;
+            const cpwd = document.getElementById("confirmNewPassword").value;
+            if (npwd.length < 8) { setFieldError("newPassword", "newPasswordError", "Min 8 characters."); return; }
+            if (npwd !== cpwd) { setFieldError("confirmNewPassword", "confirmNewPasswordError", "Passwords do not match."); return; }
             showScreen(signInScreen);
-            showMessage("signInMessage", "Log in with your new password.", "success");
+            document.getElementById("signInMessage").textContent = "Password reset successful. Log in.";
+            document.getElementById("signInMessage").className = "form-message success";
         }
     });
 
-    document.getElementById("resendCodeLink").addEventListener("click", function (e) {
+    document.getElementById("resendCodeLink").addEventListener("click", e => {
         e.preventDefault();
-        document.getElementById("resendMessage").textContent = "A new code has been sent to your email.";
+        document.getElementById("resendMessage").textContent = "New code sent!";
     });
 });
