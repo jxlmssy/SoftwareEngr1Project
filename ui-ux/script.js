@@ -1,4 +1,3 @@
-
 const loginScreen = document.getElementById("loginScreen");
 const signupScreen = document.getElementById("signupScreen");
 const resetScreen = document.getElementById("resetScreen");
@@ -210,9 +209,11 @@ document.getElementById("loginForm").addEventListener("submit", function (event)
     showMessage("loginMessage",
         "Logging in...",
         "success");
-});
+        
+    
+}); 
 
-document.getElementById("signupForm").addEventListener("submit", function (event) {
+document.getElementById("signupForm").addEventListener("submit", async function (event) {
     event.preventDefault();
 
     clearFormErrors(signupFields);
@@ -274,11 +275,35 @@ document.getElementById("signupForm").addEventListener("submit", function (event
 
     if (!isValid) return;
 
-        showScreen(loginScreen);
+    showMessage(
+        "signupMessage",
+        "Creating your account...",
+        "success"
+    );
 
-        showMessage("loginMessage",
-            "Your account has been successfully created. Log in now.",
-            "success");
+    const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password
+    });
+
+    if (error) {
+        showMessage(
+            "signupMessage",
+            error.message,
+            "error"
+        );
+        return;
+    }
+
+    console.log("Supabase signup:", data);
+
+    showScreen(loginScreen);
+
+    showMessage(
+        "loginMessage",
+        "Account created! Please check your email to verify your account.",
+        "success"
+    );
 });
 
 document.getElementById("resetForm").addEventListener("submit", function (event) {
