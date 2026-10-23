@@ -1,0 +1,30 @@
+{
+  "name": "softwareengr1project",
+  "version": "1.0.0",
+  "description": "Group project for the course Software Engineering 1",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": { 
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jxlmssy/SoftwareEngr1Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jxlmssy/SoftwareEngr1Project/issues"
+  },
+  "homepage": "https://github.com/jxlmssy/SoftwareEngr1Project#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0"
+  }
+}

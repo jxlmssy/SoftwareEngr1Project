@@ -1,3 +1,4 @@
+<<<<<<< HEAD:.github/ui-ux/script.js
 document.addEventListener("DOMContentLoaded", function () {
     const landingView = document.getElementById("landingView");
     const dashboardView = document.getElementById("dashboardView");
@@ -7,6 +8,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const signInScreen = document.getElementById("signInScreen");
     const registerScreen = document.getElementById("registerScreen");
     const resetScreen = document.getElementById("resetScreen");
+=======
+const loginScreen = document.getElementById("loginScreen");
+const signupScreen = document.getElementById("signupScreen");
+const resetScreen = document.getElementById("resetScreen");
+>>>>>>> 2e54572093020e62110cd15b3e38345c4c48987e:ui-ux/script.js
 
     const coverCards = document.querySelectorAll(".coverflow-card");
     const prevSlideBtn = document.getElementById("prevSlideBtn");
@@ -187,10 +193,261 @@ document.addEventListener("DOMContentLoaded", function () {
         if (pwd !== cpwd) { setFieldError("confirmPassword", "confirmPasswordError", "Passwords do not match."); valid = false; }
         else setFieldValid("confirmPassword", "confirmPasswordError");
 
+<<<<<<< HEAD:.github/ui-ux/script.js
         if (valid) {
             showScreen(signInScreen);
             document.getElementById("signInMessage").textContent = "Account created successfully. Log in now.";
             document.getElementById("signInMessage").className = "form-message success";
+=======
+    if (!isValid) return;
+
+    showMessage("loginMessage",
+        "Logging in...",
+        "success");
+        
+    
+}); 
+
+document.getElementById("signupForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    clearFormErrors(signupFields);
+    clearMessage("signupMessage");
+
+    const username = document.getElementById("signupUsername").value.trim();
+    const email = document.getElementById("signupEmail").value.trim();
+    const password = document.getElementById("signupPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    let isValid = true;
+
+    if (!username) {
+        showFieldError("signupUsername", "signupUsernameError",
+            "Please enter a username.");
+        isValid = false;
+    } else if (username.length < 3) {
+        showFieldError("signupUsername", "signupUsernameError",
+            "Username must be at least 3 characters long.");
+        isValid = false;
+    } else {
+        markFieldValid("signupUsername", "signupUsernameError");
+    }
+
+    if (!email) {
+        showFieldError("signupEmail", "signupEmailError",
+            "Please enter your email address.");
+        isValid = false;
+    } else if (!isValidEmail(email)) {
+        showFieldError("signupEmail", "signupEmailError",
+            "Please enter a valid email address.");
+        isValid = false;
+    } else {
+        markFieldValid("signupEmail", "signupEmailError");
+    }
+
+    if (!password) {
+        showFieldError("signupPassword", "signupPasswordError",
+            "Please create a password.");
+        isValid = false;
+    } else if (password.length < 8) {
+        showFieldError("signupPassword", "signupPasswordError",
+            "Password must be at least 8 characters long.");
+        isValid = false;
+    } else {
+        markFieldValid("signupPassword", "signupPasswordError");
+    }
+
+    if (!confirmPassword) {
+        showFieldError("confirmPassword", "confirmPasswordError",
+            "Please confirm your password.");
+        isValid = false;
+    } else if (password !== confirmPassword) {
+        showFieldError("confirmPassword", "confirmPasswordError",
+            "Passwords do not match.");
+        isValid = false;
+    } else {
+        markFieldValid("confirmPassword", "confirmPasswordError");
+    }
+
+    if (!isValid) return;
+
+    showMessage(
+        "signupMessage",
+        "Creating your account...",
+        "success"
+    );
+
+    const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password
+    });
+
+    if (error) {
+        showMessage(
+            "signupMessage",
+            error.message,
+            "error"
+        );
+        return;
+    }
+
+    console.log("Supabase signup:", data);
+
+    showScreen(loginScreen);
+
+    showMessage(
+        "loginMessage",
+        "Account created! Please check your email to verify your account.",
+        "success"
+    );
+});
+
+document.getElementById("resetForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+    clearMessage("resetMessage");
+
+    if (resetStep === "email") {
+        clearFormErrors([{ input: "resetEmail", error: "resetEmailError" }]);
+
+        const email = document.getElementById("resetEmail").value.trim();
+
+        if (!email) {
+            showFieldError("resetEmail", "resetEmailError",
+                "Please enter your email address.");
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showFieldError("resetEmail", "resetEmailError",
+                "Please enter a valid email address.");
+            return;
+        }
+
+        markFieldValid("resetEmail", "resetEmailError");
+
+        resetStep = "code";
+        document.getElementById("resetEmail").disabled = true;
+        document.getElementById("resetCodeGroup").classList.remove("hidden");
+        document.getElementById("resetSubtitle").textContent =
+            "Enter the verification code sent to your email address.";
+        document.getElementById("resetSubmitButton").textContent = "Verify Code";
+
+        showMessage("resetMessage",
+            "Email validated. Enter the verification code sent to your email address.",
+            "success");
+
+        document.getElementById("resetCode").focus();
+        return;
+    }
+
+    if (resetStep === "code") {
+        clearFormErrors([{ input: "resetCode", error: "resetCodeError" }]);
+
+        const code = document.getElementById("resetCode").value.trim();
+
+        if (!code) {
+            showFieldError("resetCode", "resetCodeError",
+                "Please enter the verification code.");
+            return;
+        }
+
+        if (!/^\d{6}$/.test(code)) {
+            showFieldError("resetCode", "resetCodeError",
+                "Please enter a valid 6-digit verification code.");
+            return;
+        }
+
+        markFieldValid("resetCode", "resetCodeError");
+
+        resetStep = "password";
+
+        document.getElementById("resetHeading").textContent = "Create new password";
+        document.getElementById("resetSubtitle").textContent =
+            "Create a new password and confirm it to finish resetting your password.";
+
+        document.getElementById("resetEmailGroup").classList.add("hidden");
+        document.getElementById("resetCodeGroup").classList.add("hidden");
+        document.getElementById("newPasswordGroup").classList.remove("hidden");
+        document.getElementById("confirmNewPasswordGroup").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").textContent = "Continue Logging In";
+        document.getElementById("resetDividerText").textContent =
+            "REMEMBERED YOUR PASSWORD?";
+
+        document.getElementById("newPassword").focus();
+        return;
+    }
+
+    if (resetStep === "password") {
+        clearFormErrors([
+            { input: "newPassword", error: "newPasswordError" },
+            { input: "confirmNewPassword", error: "confirmNewPasswordError" }
+        ]);
+
+        const newPassword = document.getElementById("newPassword").value;
+        const confirmNewPassword = document.getElementById("confirmNewPassword").value;
+        let isValid = true;
+
+        if (!newPassword) {
+            showFieldError("newPassword", "newPasswordError",
+                "Please enter your new password.");
+            isValid = false;
+        } else if (newPassword.length < 8) {
+            showFieldError("newPassword", "newPasswordError",
+                "Password must be at least 8 characters long.");
+            isValid = false;
+        } else {
+            markFieldValid("newPassword", "newPasswordError");
+        }
+
+        if (!confirmNewPassword) {
+            showFieldError("confirmNewPassword", "confirmNewPasswordError",
+                "Please confirm your new password.");
+            isValid = false;
+        } else if (newPassword !== confirmNewPassword) {
+            showFieldError("confirmNewPassword", "confirmNewPasswordError",
+                "Passwords do not match.");
+            isValid = false;
+        } else if (newPassword.length >= 8) {
+            markFieldValid("confirmNewPassword", "confirmNewPasswordError");
+        }
+
+        if (!isValid) return;
+
+        showScreen(loginScreen);
+
+        showMessage("loginMessage",
+            "Log in with your new password.",
+            "success");
+    }
+});
+
+document.getElementById("resendCodeLink").addEventListener("click", function (event) {
+    event.preventDefault();
+
+    if (resetStep !== "code") return;
+
+    document.getElementById("resetCode").value = "";
+    clearFieldError("resetCode", "resetCodeError");
+    clearMessage("resetMessage");
+
+    document.getElementById("resendMessage").textContent =
+        "A new code has been sent to your email.";
+
+    document.getElementById("resetCode").focus();
+});
+
+document.querySelectorAll(".toggle-password").forEach(function (button) {
+    button.addEventListener("click", function () {
+        const input = document.getElementById(button.dataset.target);
+
+        if (input.type === "password") {
+            input.type = "text";
+            button.textContent = "Hide";
+            button.setAttribute("aria-label", "Hide password");
+        } else {
+            input.type = "password";
+            button.textContent = "Show";
+            button.setAttribute("aria-label", "Show password");
+>>>>>>> 2e54572093020e62110cd15b3e38345c4c48987e:ui-ux/script.js
         }
     });
 
