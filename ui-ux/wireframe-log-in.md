@@ -1,4 +1,5 @@
 # Wireframes login, register, set/reset password
+![alt text](<Screenshot 2026-10-24 155426.png>)
 
 # Description
 This document outlines the core wireframes and structural user interface specifications for task [S1-UIX-02]. It establishes the visual layout, input component structures, and user flow patterns for the application's authentication screens.
