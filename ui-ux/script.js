@@ -166,31 +166,100 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    document.getElementById("registerForm").addEventListener("submit", e => {
+    const registerMessage = document.getElementById("registerMessage");
+
+    document.getElementById("registerForm").addEventListener("submit", async e => {
         e.preventDefault();
+
         clearErrors(registerFields);
+        registerMessage.textContent = "";
+        registerMessage.className = "form-message";
+
         const user = document.getElementById("registerUsername").value.trim();
         const email = document.getElementById("registerEmail").value.trim();
         const pwd = document.getElementById("registerPassword").value;
         const cpwd = document.getElementById("confirmPassword").value;
+
         let valid = true;
 
-        if (!user || user.length < 3) { setFieldError("registerUsername", "registerUsernameError", "Min 3 characters required."); valid = false; }
-        else setFieldValid("registerUsername", "registerUsernameError");
+        if (!user || user.length < 3) {
+            setFieldError(
+                "registerUsername",
+                "registerUsernameError",
+                "Min 3 characters required."
+            );
+            valid = false;
+        } else {
+            setFieldValid("registerUsername", "registerUsernameError");
+        }
 
-        if (!isValidEmail(email)) { setFieldError("registerEmail", "registerEmailError", "Enter a valid email."); valid = false; }
-        else setFieldValid("registerEmail", "registerEmailError");
+        if (!isValidEmail(email)) {
+            setFieldError(
+                "registerEmail",
+                "registerEmailError",
+                "Enter a valid email."
+            );
+            valid = false;
+        } else {
+            setFieldValid("registerEmail", "registerEmailError");
+        }
 
-        if (!pwd || pwd.length < 8) { setFieldError("registerPassword", "registerPasswordError", "Min 8 characters required."); valid = false; }
-        else setFieldValid("registerPassword", "registerPasswordError");
+        if (!pwd || pwd.length < 8) {
+            setFieldError(
+                "registerPassword",
+                "registerPasswordError",
+                "Min 8 characters required."
+            );
+            valid = false;
+        } else {
+            setFieldValid("registerPassword", "registerPasswordError");
+        }
 
-        if (pwd !== cpwd) { setFieldError("confirmPassword", "confirmPasswordError", "Passwords do not match."); valid = false; }
-        else setFieldValid("confirmPassword", "confirmPasswordError");
+        if (pwd !== cpwd) {
+            setFieldError(
+                "confirmPassword",
+                "confirmPasswordError",
+                "Passwords do not match."
+            );
+            valid = false;
+        } else {
+            setFieldValid("confirmPassword", "confirmPasswordError");
+        }
 
-        if (valid) {
-            showScreen(signInScreen);
-            document.getElementById("signInMessage").textContent = "Account created successfully. Log in now.";
-            document.getElementById("signInMessage").className = "form-message success";
+        if (!valid) {
+            return;
+        }
+        try {
+            const response = await fetch("http://localhost:3000/api/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: pwd
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                registerMessage.textContent =
+                    result.error || "Registration failed.";
+                registerMessage.className = "form-message error";
+
+                return;
+            }
+
+            registerMessage.textContent = result.message;
+            registerMessage.className = "form-message success";
+            document.getElementById("registerForm").reset();
+
+        } catch (error) {
+            console.error("Registration error:", error);
+
+            registerMessage.textContent = "Unable to connect to the server.";
+            registerMessage.className = "form-message error";
         }
     });
 
