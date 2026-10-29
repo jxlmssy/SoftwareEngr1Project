@@ -1,6 +1,6 @@
 # Wireframes Main Page, User Management List and Rights Dialog
-![alt text](<Main Page Dashboard.png>)
-![alt text](<User Management.png>)
+![alt text](<wireframe main page (dashboard).png>)
+![alt text](<wireframe user management.png>)
 ![alt text](<Rights Dialog.png>)
 
 # Description
