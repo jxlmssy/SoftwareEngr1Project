@@ -4,9 +4,15 @@ require("dotenv").config();
 
 const { createClient } = require("@supabase/supabase-js");
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const path = require('path');
+app.use(express.static(path.join(__dirname, '..', 'ui-ux')));
+
+app.listen(3000, () => console.log('Server running on http://localhost:3000'));
 
 const opts = { auth: { autoRefreshToken: false, persistSession: false } };
 
@@ -256,6 +262,7 @@ app.post("/api/admin/users", requireAuth, requirePasswordSet, requireAdmin, asyn
 
     res.status(201).json({ message: "User created. They must set a new password on first login." });
 });
+
 
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Backend running at http://localhost:${PORT}`));
