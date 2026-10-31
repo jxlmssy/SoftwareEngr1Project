@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const API = "http://localhost:3000/api";
+    const API = "/api";
 
     const landingView = document.getElementById("landingView");
     const dashboardView = document.getElementById("dashboardView");
@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const signInScreen = document.getElementById("signInScreen");
     const registerScreen = document.getElementById("registerScreen");
     const resetScreen = document.getElementById("resetScreen");
+    const resetMessage = document.getElementById("resetMessage");
 
     const coverCards = document.querySelectorAll(".coverflow-card");
     const prevSlideBtn = document.getElementById("prevSlideBtn");
@@ -42,6 +43,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     let firstLoginMode = false;
+    let resetFlow = "request";
+    let recoveryAccessToken = "";
 
     const signInFields = [{ input: "signInEmail", error: "signInEmailError" }, { input: "signInPassword", error: "signInPasswordError" }];
     const registerFields = [{ input: "registerUsername", error: "registerUsernameError" }, { input: "registerEmail", error: "registerEmailError" }, { input: "registerPassword", error: "registerPasswordError" }, { input: "confirmPassword", error: "confirmPasswordError" }];
@@ -112,21 +115,70 @@ document.addEventListener("DOMContentLoaded", function () {
     function showScreen(screen) {
         [signInScreen, registerScreen, resetScreen].forEach(s => s.classList.add("hidden"));
         screen.classList.remove("hidden");
-        if (screen === resetScreen) {
-            firstLoginMode = false;
-            document.getElementById("resetForm").reset();
-        }
+    }
+
+    function showResetRequest() {
+        firstLoginMode = false;
+        resetFlow = "request";
+        recoveryAccessToken = "";
+        document.getElementById("resetForm").reset();
+        document.getElementById("resetEmail").readOnly = false;
+        document.getElementById("resetHeading").textContent = "Reset password";
+        document.getElementById("resetSubtitle").textContent = "Enter your email address and we'll send you an eight-digit verification code.";
+        document.getElementById("resetEmailGroup").classList.remove("hidden");
+        document.getElementById("resetCodeGroup").classList.add("hidden");
+        document.getElementById("newPasswordGroup").classList.add("hidden");
+        document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
+        document.getElementById("resetSubmitButton").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").textContent = "Send Code";
+        resetMessage.textContent = "";
+        resetMessage.className = "form-message";
+        openModal(resetScreen);
+    }
+
+    function showResetCode() {
+        resetFlow = "verify";
+        document.getElementById("resetHeading").textContent = "Reset your password";
+        document.getElementById("resetSubtitle").textContent = "Enter the eight-digit code sent to your email.";
+        document.getElementById("resetEmail").readOnly = true;
+        document.getElementById("resetEmailGroup").classList.remove("hidden");
+        document.getElementById("resetCodeGroup").classList.remove("hidden");
+        document.getElementById("newPasswordGroup").classList.add("hidden");
+        document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
+        document.getElementById("resetSubmitButton").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").textContent = "Verify Code";
+    }
+
+    function showVerifiedResetPassword() {
+        resetFlow = "recovery";
+        document.getElementById("resetHeading").textContent = "Choose a new password";
+        document.getElementById("resetSubtitle").textContent = "Enter and confirm your new password to finish resetting your account.";
+        document.getElementById("resetEmail").readOnly = true;
+        document.getElementById("resetEmailGroup").classList.remove("hidden");
+        document.getElementById("resetCodeGroup").classList.add("hidden");
+        document.getElementById("newPasswordGroup").classList.remove("hidden");
+        document.getElementById("confirmNewPasswordGroup").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").textContent = "Reset Password";
+        resetMessage.textContent = "";
+        resetMessage.className = "form-message";
     }
 
     function showFirstLoginPassword() {
         openModal(resetScreen);
         firstLoginMode = true;
+        resetFlow = "first-login";
+        recoveryAccessToken = "";
+        document.getElementById("resetForm").reset();
+        resetMessage.textContent = "";
+        resetMessage.className = "form-message";
         document.getElementById("resetHeading").textContent = "Set your password";
         document.getElementById("resetSubtitle").textContent = "You must create a new password before continuing.";
         document.getElementById("resetEmailGroup").classList.add("hidden");
         document.getElementById("resetCodeGroup").classList.add("hidden");
         document.getElementById("newPasswordGroup").classList.remove("hidden");
         document.getElementById("confirmNewPasswordGroup").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").classList.remove("hidden");
         document.getElementById("resetSubmitButton").textContent = "Save Password";
     }
 
@@ -204,7 +256,10 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("switchToSignInLink").addEventListener("click", e => { e.preventDefault(); showScreen(signInScreen); });
 
     const forgotLink = document.getElementById("forgotPasswordLink");
-    if (forgotLink) forgotLink.style.display = "none";
+    if (forgotLink) forgotLink.addEventListener("click", e => {
+        e.preventDefault();
+        showResetRequest();
+    });
 
     const backLink = document.getElementById("backToSignInLink");
     if (backLink) backLink.addEventListener("click", e => { e.preventDefault(); closeModalBtn.click(); openModal(signInScreen); });
@@ -220,6 +275,32 @@ document.addEventListener("DOMContentLoaded", function () {
     [...signInFields, ...registerFields, ...resetFields].forEach(f => {
         const input = document.getElementById(f.input);
         if (input) input.addEventListener("input", () => clearFieldError(f.input, f.error));
+    });
+
+    document.getElementById("resetCode").addEventListener("input", e => {
+        e.target.value = e.target.value.replace(/\D/g, "").slice(0, 8);
+    });
+
+    document.getElementById("resendCodeLink").addEventListener("click", async e => {
+        e.preventDefault();
+        const email = document.getElementById("resetEmail").value.trim();
+        const resendLink = e.currentTarget;
+        resendLink.textContent = "Sending...";
+        resendLink.setAttribute("aria-disabled", "true");
+        try {
+            const r = await post("/request-password-reset", { email });
+            resetMessage.textContent = r.ok
+                ? r.data.message
+                : (r.data.error || "Unable to resend the code.");
+            resetMessage.className = "form-message " + (r.ok ? "success" : "error");
+        } catch (err) {
+            console.error("Password reset code resend error:", err);
+            resetMessage.textContent = "Unable to connect to the server.";
+            resetMessage.className = "form-message error";
+        } finally {
+            resendLink.textContent = "Resend code";
+            resendLink.removeAttribute("aria-disabled");
+        }
     });
 
     document.getElementById("signInForm").addEventListener("submit", async e => {
@@ -340,7 +421,61 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("resetForm").addEventListener("submit", async e => {
         e.preventDefault();
-        if (!firstLoginMode) return;
+        clearErrors(resetFields);
+        resetMessage.textContent = "";
+        resetMessage.className = "form-message";
+
+        if (resetFlow === "request") {
+            const email = document.getElementById("resetEmail").value.trim();
+            if (!isValidEmail(email)) {
+                setFieldError("resetEmail", "resetEmailError", "Enter a valid email address.");
+                return;
+            }
+
+            try {
+                const r = await post("/request-password-reset", { email });
+                if (!r.ok) {
+                    resetMessage.textContent = r.data.error || "Unable to send a verification code.";
+                    resetMessage.className = "form-message error";
+                    return;
+                }
+
+                showResetCode();
+                resetMessage.textContent = r.data.message;
+                resetMessage.className = "form-message success";
+            } catch (err) {
+                console.error("Password reset request error:", err);
+                resetMessage.textContent = "Unable to connect to the server.";
+                resetMessage.className = "form-message error";
+            }
+            return;
+        }
+
+        if (resetFlow === "verify") {
+            const email = document.getElementById("resetEmail").value.trim();
+            const code = document.getElementById("resetCode").value.trim();
+            if (!/^\d{8}$/.test(code)) {
+                setFieldError("resetCode", "resetCodeError", "Enter the eight-digit code from your email.");
+                return;
+            }
+
+            try {
+                const r = await post("/verify-password-reset", { email, code });
+                if (!r.ok) {
+                    resetMessage.textContent = r.data.error || "The code could not be verified.";
+                    resetMessage.className = "form-message error";
+                    return;
+                }
+
+                recoveryAccessToken = r.data.access_token;
+                showVerifiedResetPassword();
+            } catch (err) {
+                console.error("Password reset verification error:", err);
+                resetMessage.textContent = "Unable to connect to the server.";
+                resetMessage.className = "form-message error";
+            }
+            return;
+        }
 
         const npwd = document.getElementById("newPassword").value;
         const cpwd = document.getElementById("confirmNewPassword").value;
@@ -348,16 +483,38 @@ document.addEventListener("DOMContentLoaded", function () {
         if (npwd !== cpwd) { setFieldError("confirmNewPassword", "confirmNewPasswordError", "Passwords do not match."); return; }
 
         try {
-            const token = sessionStorage.getItem("access_token");
-            const r = await post("/set-password", { newPassword: npwd }, token);
-            if (!r.ok) { setFieldError("newPassword", "newPasswordError", r.data.error || "Could not save password."); return; }
+            if (resetFlow === "first-login") {
+                const token = sessionStorage.getItem("access_token");
+                const r = await post("/set-password", { newPassword: npwd }, token);
+                if (!r.ok) {
+                    setFieldError("newPassword", "newPasswordError", r.data.error || "Could not save password.");
+                    return;
+                }
 
-            firstLoginMode = false;
-            const me = await fetchMe();
-            navigateToDashboard(me ? displayName(me) : "User");
+                firstLoginMode = false;
+                const me = await fetchMe();
+                navigateToDashboard(me ? displayName(me) : "User");
+                return;
+            }
+
+            const r = await post("/reset-password", { newPassword: npwd }, recoveryAccessToken);
+            if (!r.ok) {
+                resetMessage.textContent = r.data.error || "Could not reset password.";
+                resetMessage.className = "form-message error";
+                return;
+            }
+
+            recoveryAccessToken = "";
+            resetFlow = "complete";
+            document.getElementById("newPasswordGroup").classList.add("hidden");
+            document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
+            document.getElementById("resetSubmitButton").classList.add("hidden");
+            resetMessage.textContent = "Password reset successfully. You can now sign in.";
+            resetMessage.className = "form-message success";
         } catch (err) {
-            console.error("Set password error:", err);
-            setFieldError("newPassword", "newPasswordError", "Unable to connect to the server.");
+            console.error("Password reset error:", err);
+            resetMessage.textContent = "Unable to connect to the server.";
+            resetMessage.className = "form-message error";
         }
     });
 
