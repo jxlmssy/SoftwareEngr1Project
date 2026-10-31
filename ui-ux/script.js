@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const API = "http://localhost:3000/api";
+    const API = "/api";
 
     const landingView = document.getElementById("landingView");
     const dashboardView = document.getElementById("dashboardView");
@@ -9,6 +9,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const signInScreen = document.getElementById("signInScreen");
     const registerScreen = document.getElementById("registerScreen");
     const resetScreen = document.getElementById("resetScreen");
+    const resetMessage = document.getElementById("resetMessage");
+    const userManagementNav = document.getElementById("userManagementNav");
+    const administrationLabel = document.getElementById("administrationLabel");
+    const dashboardHome = document.getElementById("dashboardHome");
+    const userManagementView = document.getElementById("userManagementView");
+    const usersTableBody = document.getElementById("usersTableBody");
+    const userManagementFeedback = document.getElementById("userManagementFeedback");
+    const addUserModal = document.getElementById("addUserModal");
+    const editUserModal = document.getElementById("editUserModal");
+    let currentUserRole = "user";
+    let usersLoaded = false;
+    let usersById = new Map();
 
     const coverCards = document.querySelectorAll(".coverflow-card");
     const prevSlideBtn = document.getElementById("prevSlideBtn");
@@ -42,6 +54,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     let firstLoginMode = false;
+    let resetFlow = "request";
+    let recoveryAccessToken = "";
 
     const signInFields = [{ input: "signInEmail", error: "signInEmailError" }, { input: "signInPassword", error: "signInPasswordError" }];
     const registerFields = [{ input: "registerUsername", error: "registerUsernameError" }, { input: "registerEmail", error: "registerEmailError" }, { input: "registerPassword", error: "registerPasswordError" }, { input: "confirmPassword", error: "confirmPasswordError" }];
@@ -50,11 +64,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function saveSession(result) {
         sessionStorage.setItem("access_token", result.access_token);
         sessionStorage.setItem("refresh_token", result.refresh_token);
+        if (result.user && result.user.id) sessionStorage.setItem("user_id", result.user.id);
     }
 
     function clearSession() {
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("refresh_token");
+        sessionStorage.removeItem("user_id");
     }
 
     async function post(path, body, token) {
@@ -107,6 +123,8 @@ document.addEventListener("DOMContentLoaded", function () {
         authModalOverlay.classList.add("hidden");
         document.body.style.overflow = "";
         clearErrors([...signInFields, ...registerFields, ...resetFields]);
+        recoveryAccessToken = "";
+        if (!firstLoginMode) resetFlow = "request";
     }
 
     function showScreen(screen) {
@@ -121,23 +139,350 @@ document.addEventListener("DOMContentLoaded", function () {
     function showFirstLoginPassword() {
         openModal(resetScreen);
         firstLoginMode = true;
+        resetFlow = "first-login";
+        recoveryAccessToken = "";
+        document.getElementById("resetForm").reset();
+        resetMessage.textContent = "";
+        resetMessage.className = "form-message";
         document.getElementById("resetHeading").textContent = "Set your password";
         document.getElementById("resetSubtitle").textContent = "You must create a new password before continuing.";
         document.getElementById("resetEmailGroup").classList.add("hidden");
         document.getElementById("resetCodeGroup").classList.add("hidden");
         document.getElementById("newPasswordGroup").classList.remove("hidden");
         document.getElementById("confirmNewPasswordGroup").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").classList.remove("hidden");
         document.getElementById("resetSubmitButton").textContent = "Save Password";
     }
 
-    function navigateToDashboard(name) {
+    function showResetRequest() {
+        firstLoginMode = false;
+        resetFlow = "request";
+        recoveryAccessToken = "";
+        document.getElementById("resetEmail").readOnly = false;
+        document.getElementById("resetEmailGroup").classList.remove("hidden");
+        document.getElementById("resetCodeGroup").classList.add("hidden");
+        document.getElementById("newPasswordGroup").classList.add("hidden");
+        document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
+        document.getElementById("resetSubmitButton").classList.remove("hidden");
+        document.getElementById("resetHeading").textContent = "Reset password";
+        document.getElementById("resetSubtitle").textContent = "Enter your email address and we'll send you an eight-digit verification code.";
+        document.getElementById("resetSubmitButton").textContent = "Send Code";
+        resetMessage.textContent = "";
+        resetMessage.className = "form-message";
+        openModal(resetScreen);
+    }
+
+    function showResetCode() {
+        resetFlow = "verify";
+        document.getElementById("resetHeading").textContent = "Reset your password";
+        document.getElementById("resetSubtitle").textContent = "Enter the eight-digit code sent to your email.";
+        document.getElementById("resetEmail").readOnly = true;
+        document.getElementById("resetEmailGroup").classList.remove("hidden");
+        document.getElementById("resetCodeGroup").classList.remove("hidden");
+        document.getElementById("newPasswordGroup").classList.add("hidden");
+        document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
+        document.getElementById("resetSubmitButton").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").textContent = "Verify Code";
+    }
+
+    function showVerifiedResetPassword() {
+        resetFlow = "recovery";
+        document.getElementById("resetHeading").textContent = "Choose a new password";
+        document.getElementById("resetSubtitle").textContent = "Enter and confirm your new password to finish resetting your account.";
+        document.getElementById("resetEmail").readOnly = true;
+        document.getElementById("resetEmailGroup").classList.remove("hidden");
+        document.getElementById("resetCodeGroup").classList.add("hidden");
+        document.getElementById("newPasswordGroup").classList.remove("hidden");
+        document.getElementById("confirmNewPasswordGroup").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").classList.remove("hidden");
+        document.getElementById("resetSubmitButton").textContent = "Reset Password";
+        resetMessage.textContent = "";
+        resetMessage.className = "form-message";
+    }
+
+    function navigateToDashboard(name, role) {
         const userName = name || "User";
+        currentUserRole = ["admin", "superadmin"].includes(String(role || "").toLowerCase())
+            ? String(role).toLowerCase()
+            : "user";
         document.getElementById("dashUserName").textContent = userName;
+        const roleBadge = document.getElementById("dashUserRole");
+        roleBadge.textContent = currentUserRole === "superadmin"
+            ? "Superadmin"
+            : currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1);
+        roleBadge.className = "user-role-label " + currentUserRole;
+        const canManageUsers = ["admin", "superadmin"].includes(currentUserRole);
+        userManagementNav.classList.toggle("hidden", !canManageUsers);
+        administrationLabel.classList.toggle("hidden", !canManageUsers);
+        if (!canManageUsers && userManagementView) showDashboardPage("dashboard");
         document.getElementById("bannerUserName").textContent = userName.split(" ")[0];
         closeModal();
         landingView.classList.add("hidden");
         dashboardView.classList.remove("hidden");
         window.scrollTo(0, 0);
+    }
+
+    function showDashboardPage(page) {
+        const showUsers = page === "users" && ["admin", "superadmin"].includes(currentUserRole);
+        dashboardHome.classList.toggle("hidden", showUsers);
+        userManagementView.classList.toggle("hidden", !showUsers);
+        document.querySelector(".dash-page-title").textContent = showUsers ? "User Management" : "Dashboard";
+        document.querySelectorAll("[data-dashboard-page]").forEach(button => {
+            button.classList.toggle("active", button.dataset.dashboardPage === (showUsers ? "users" : "dashboard"));
+        });
+        if (showUsers && !usersLoaded) loadUsers();
+    }
+
+    function showUserManagementFeedback(text, isError) {
+        userManagementFeedback.textContent = text;
+        userManagementFeedback.classList.toggle("hidden", !text);
+        userManagementFeedback.classList.toggle("error", Boolean(isError));
+        userManagementFeedback.classList.toggle("success", Boolean(text) && !isError);
+    }
+
+    function createUserCell(text, className) {
+        const cell = document.createElement("td");
+        if (className) cell.className = className;
+        cell.textContent = text || "";
+        return cell;
+    }
+
+    function createUserAction(label, action, userId, variant) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "user-action-btn" + (variant ? " " + variant : "");
+        button.dataset.userAction = action;
+        button.dataset.userId = userId;
+        button.textContent = label;
+        return button;
+    }
+
+    function renderUsers(users) {
+        usersTableBody.replaceChildren();
+        usersById = new Map(users.map(user => [user.id, user]));
+        const visibleUsers = (currentUserRole === "superadmin"
+            ? users
+            : users.filter(user => !user.is_deleted && String(user.role).toLowerCase() !== "superadmin")).slice();
+        const roleOrder = { superadmin: 0, admin: 1, user: 2 };
+        visibleUsers.sort((a, b) => {
+            const roleA = roleOrder[String(a.role || "user").toLowerCase()] ?? 3;
+            const roleB = roleOrder[String(b.role || "user").toLowerCase()] ?? 3;
+            return roleA - roleB || new Date(b.created_at) - new Date(a.created_at);
+        });
+
+        if (!visibleUsers.length) {
+            const row = document.createElement("tr");
+            const cell = createUserCell("No user accounts found.", "users-table-state");
+            cell.colSpan = 5;
+            row.append(cell);
+            usersTableBody.append(row);
+            return;
+        }
+
+        visibleUsers.forEach(user => {
+            const row = document.createElement("tr");
+            const role = String(user.role || "user").toLowerCase();
+            const profileStatus = String(user.status || "").toLowerCase();
+            const active = user.is_active === true || user.is_active === "true" || user.is_active === 1;
+            const inactive = user.is_active === false || user.is_active === "false" || user.is_active === 0;
+            const status = user.is_deleted
+                ? { label: "Deleted", className: "blocked" }
+                : profileStatus === "rejected"
+                    ? { label: "Disapproved", className: "blocked" }
+                    : user.is_blocked
+                        ? { label: "Blocked", className: "blocked" }
+                        : inactive
+                            ? { label: "Inactive", className: "inactive" }
+                            : (!active || profileStatus !== "approved")
+                                ? { label: "Pending", className: "pending" }
+                                : { label: "Active", className: "active" };
+
+            const emailName = [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+                (user.email || "").split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, char => char.toUpperCase()) ||
+                "User";
+            row.append(createUserCell(emailName, "user-name-cell"));
+            row.append(createUserCell(user.email, "user-email-cell"));
+
+            const roleCell = document.createElement("td");
+            const roleBadge = document.createElement("span");
+            roleBadge.className = "role-badge " + (role === "admin" || role === "superadmin" ? "admin-role" : "user-role");
+            roleBadge.textContent = role === "superadmin" ? "Superadmin" : role.charAt(0).toUpperCase() + role.slice(1);
+            roleCell.append(roleBadge);
+            row.append(roleCell);
+
+            const statusCell = document.createElement("td");
+            const statusBadge = document.createElement("span");
+            statusBadge.className = "status-badge " + status.className;
+            statusBadge.textContent = status.label;
+            statusCell.append(statusBadge);
+            row.append(statusCell);
+
+            const actionsCell = document.createElement("td");
+            const actions = document.createElement("div");
+            actions.className = "user-actions-cell";
+            const canManageTarget = currentUserRole === "superadmin" || !["admin", "superadmin"].includes(role);
+            const requiresApproval = !["approved", "rejected"].includes(profileStatus);
+            if (canManageTarget && requiresApproval && !user.is_blocked && !user.is_deleted) {
+                actions.append(createUserAction("Approve", "approve", user.id, "approve"));
+                actions.append(createUserAction("Disapprove", "disapprove", user.id, "disapprove"));
+            } else if (canManageTarget && status.label === "Blocked" && !user.is_deleted) {
+                actions.append(createUserAction("Unblock", "unblock", user.id));
+            } else if (canManageTarget && status.label === "Active" && user.id !== sessionStorage.getItem("user_id")) {
+                actions.append(createUserAction("Block", "block", user.id, "danger"));
+            }
+            if (canManageTarget && status.label !== "Deleted") actions.append(createUserAction("Edit ✎", "edit", user.id, "edit"));
+            actionsCell.append(actions);
+            row.append(actionsCell);
+            usersTableBody.append(row);
+        });
+    }
+
+    async function loadUsers() {
+        usersTableBody.replaceChildren();
+        const row = document.createElement("tr");
+        const cell = createUserCell("Loading users...", "users-table-state");
+        cell.colSpan = 5;
+        row.append(cell);
+        usersTableBody.append(row);
+        showUserManagementFeedback("", false);
+        try {
+            const response = await fetch(API + "/admin/users", {
+                headers: { Authorization: "Bearer " + sessionStorage.getItem("access_token") }
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                usersLoaded = false;
+                showUserManagementFeedback(data.error || "Unable to load users.", true);
+                usersTableBody.replaceChildren();
+                return;
+            }
+            usersLoaded = true;
+            renderUsers(data.users);
+        } catch (error) {
+            console.error("Load users error:", error);
+            usersLoaded = false;
+            showUserManagementFeedback("Unable to connect to the server.", true);
+            usersTableBody.replaceChildren();
+        }
+    }
+
+    async function updateUserStatus(action, userId) {
+        const button = [...usersTableBody.querySelectorAll("[data-user-action]")].find(candidate =>
+            candidate.dataset.userId === userId && candidate.dataset.userAction === action
+        );
+        if (button) button.disabled = true;
+        showUserManagementFeedback("", false);
+        try {
+            const response = await fetch(API + "/admin/users/" + encodeURIComponent(userId) + "/" + action, {
+                method: "POST",
+                headers: { Authorization: "Bearer " + sessionStorage.getItem("access_token") }
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                showUserManagementFeedback(data.error || "Unable to update user.", true);
+                if (button) button.disabled = false;
+                return;
+            }
+            usersLoaded = false;
+            await loadUsers();
+            showUserManagementFeedback(data.message || "User updated.", false);
+        } catch (error) {
+            console.error("Update user error:", error);
+            showUserManagementFeedback("Unable to connect to the server.", true);
+            if (button) button.disabled = false;
+        }
+    }
+
+    function populateRoleSelect(select, selectedRole) {
+        select.replaceChildren();
+        const roles = currentUserRole === "superadmin" ? ["user", "admin", "superadmin"] : ["user"];
+        roles.forEach(role => {
+            const option = document.createElement("option");
+            option.value = role;
+            option.textContent = role === "superadmin" ? "Superadmin" : role.charAt(0).toUpperCase() + role.slice(1);
+            select.append(option);
+        });
+        select.value = String(selectedRole || "user").toLowerCase();
+    }
+
+    function openEditUserModal(userId) {
+        const user = usersById.get(userId);
+        if (!user) {
+            showUserManagementFeedback("Unable to find that user. Refresh the list and try again.", true);
+            return;
+        }
+        const form = document.getElementById("editUserForm");
+        form.dataset.userId = userId;
+        document.getElementById("editUserFirstName").value = user.first_name || "";
+        document.getElementById("editUserLastName").value = user.last_name || "";
+        document.getElementById("editUserEmail").value = user.email || "";
+        populateRoleSelect(document.getElementById("editUserRole"), user.role);
+        const status = user.is_blocked
+            ? "blocked"
+            : user.status === "rejected"
+                ? "disapproved"
+                : user.is_active === false || user.is_active === "false" || user.is_active === 0
+                    ? "inactive"
+                    : user.is_active && user.status === "approved"
+                        ? "active"
+                        : "pending";
+        document.getElementById("editUserStatus").value = status;
+        document.getElementById("editUserEmailError").textContent = "";
+        const message = document.getElementById("editUserMessage");
+        message.textContent = "";
+        message.className = "form-message";
+        editUserModal.classList.remove("hidden");
+    }
+
+    function closeEditUserModal() {
+        editUserModal.classList.add("hidden");
+    }
+
+    async function saveEditedUser(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const email = document.getElementById("editUserEmail").value.trim();
+        const emailError = document.getElementById("editUserEmailError");
+        const message = document.getElementById("editUserMessage");
+        emailError.textContent = "";
+        if (!isValidEmail(email)) {
+            emailError.textContent = "Enter a valid email address.";
+            return;
+        }
+        const submit = document.getElementById("editUserSubmitBtn");
+        submit.disabled = true;
+        try {
+            const response = await fetch(API + "/admin/users/" + encodeURIComponent(form.dataset.userId), {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + sessionStorage.getItem("access_token")
+                },
+                body: JSON.stringify({
+                    firstName: document.getElementById("editUserFirstName").value.trim(),
+                    lastName: document.getElementById("editUserLastName").value.trim(),
+                    email,
+                    role: document.getElementById("editUserRole").value,
+                    status: document.getElementById("editUserStatus").value
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                message.textContent = data.error || "Unable to update user.";
+                message.className = "form-message error";
+                return;
+            }
+            closeEditUserModal();
+            usersLoaded = false;
+            await loadUsers();
+            showUserManagementFeedback(data.message || "User account updated.", false);
+        } catch (error) {
+            console.error("Edit user error:", error);
+            message.textContent = "Unable to connect to the server.";
+            message.className = "form-message error";
+        } finally {
+            submit.disabled = false;
+        }
     }
 
     function navigateToLanding() {
@@ -189,22 +534,109 @@ document.addEventListener("DOMContentLoaded", function () {
     authModalOverlay.addEventListener("click", e => { if (e.target === authModalOverlay) closeModalBtn.click(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeModalBtn.click(); });
 
-    document.getElementById("googleBtnSignIn").addEventListener("click", () => navigateToDashboard("Google User"));
-    document.getElementById("googleBtnRegister").addEventListener("click", () => navigateToDashboard("Google User"));
+    document.getElementById("googleBtnSignIn").addEventListener("click", () => navigateToDashboard("Google User", "user"));
+    document.getElementById("googleBtnRegister").addEventListener("click", () => navigateToDashboard("Google User", "user"));
     document.getElementById("sidebarToggleBtn").addEventListener("click", () => dashboardView.querySelector(".dash-sidebar").classList.toggle("collapsed"));
 
     document.getElementById("logoutBtn").addEventListener("click", async () => {
         const token = sessionStorage.getItem("access_token");
         await post("/logout", {}, token).catch(() => {});
         clearSession();
+        currentUserRole = "user";
+        usersLoaded = false;
         navigateToLanding();
     });
+
+    userManagementNav.addEventListener("click", () => showDashboardPage("users"));
+    document.querySelector("[data-dashboard-page='dashboard']").addEventListener("click", () => showDashboardPage("dashboard"));
+    usersTableBody.addEventListener("click", event => {
+        const button = event.target.closest("[data-user-action]");
+        if (!button) return;
+        if (button.dataset.userAction === "edit") openEditUserModal(button.dataset.userId);
+        else updateUserStatus(button.dataset.userAction, button.dataset.userId);
+    });
+
+    document.getElementById("addUserBtn").addEventListener("click", () => {
+        document.getElementById("addUserForm").reset();
+        populateRoleSelect(document.getElementById("addUserRole"), "user");
+        document.getElementById("addUserMessage").textContent = "";
+        document.getElementById("addUserMessage").className = "form-message";
+        document.getElementById("addUserEmailError").textContent = "";
+        document.getElementById("addUserPasswordError").textContent = "";
+        addUserModal.classList.remove("hidden");
+    });
+
+    function closeAddUserModal() {
+        addUserModal.classList.add("hidden");
+    }
+
+    document.getElementById("closeAddUserBtn").addEventListener("click", closeAddUserModal);
+    addUserModal.addEventListener("click", event => {
+        if (event.target === addUserModal) closeAddUserModal();
+    });
+
+    document.getElementById("addUserForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        const email = document.getElementById("addUserEmail").value.trim();
+        const tempPassword = document.getElementById("addUserPassword").value;
+        const emailError = document.getElementById("addUserEmailError");
+        const passwordError = document.getElementById("addUserPasswordError");
+        const message = document.getElementById("addUserMessage");
+        emailError.textContent = "";
+        passwordError.textContent = "";
+        message.textContent = "";
+        if (!isValidEmail(email)) {
+            emailError.textContent = "Enter a valid email address.";
+            return;
+        }
+        if (tempPassword.length < 8) {
+            passwordError.textContent = "Use at least 8 characters.";
+            return;
+        }
+
+        const submit = document.getElementById("addUserSubmitBtn");
+        submit.disabled = true;
+        try {
+            const result = await post("/admin/users", {
+                firstName: document.getElementById("addUserFirstName").value.trim(),
+                lastName: document.getElementById("addUserLastName").value.trim(),
+                email,
+                tempPassword,
+                role: document.getElementById("addUserRole").value,
+                status: document.getElementById("addUserStatus").value
+            }, sessionStorage.getItem("access_token"));
+            if (!result.ok) {
+                message.textContent = result.data.error || "Unable to create user.";
+                message.className = "form-message error";
+                return;
+            }
+            closeAddUserModal();
+            usersLoaded = false;
+            await loadUsers();
+            showUserManagementFeedback(result.data.message || "User created.", false);
+        } catch (error) {
+            console.error("Create user error:", error);
+            message.textContent = "Unable to connect to the server.";
+            message.className = "form-message error";
+        } finally {
+            submit.disabled = false;
+        }
+    });
+
+    document.getElementById("closeEditUserBtn").addEventListener("click", closeEditUserModal);
+    editUserModal.addEventListener("click", event => {
+        if (event.target === editUserModal) closeEditUserModal();
+    });
+    document.getElementById("editUserForm").addEventListener("submit", saveEditedUser);
 
     document.getElementById("switchToRegisterLink").addEventListener("click", e => { e.preventDefault(); showScreen(registerScreen); });
     document.getElementById("switchToSignInLink").addEventListener("click", e => { e.preventDefault(); showScreen(signInScreen); });
 
     const forgotLink = document.getElementById("forgotPasswordLink");
-    if (forgotLink) forgotLink.style.display = "none";
+    if (forgotLink) forgotLink.addEventListener("click", e => {
+        e.preventDefault();
+        showResetRequest();
+    });
 
     const backLink = document.getElementById("backToSignInLink");
     if (backLink) backLink.addEventListener("click", e => { e.preventDefault(); closeModalBtn.click(); openModal(signInScreen); });
@@ -220,6 +652,33 @@ document.addEventListener("DOMContentLoaded", function () {
     [...signInFields, ...registerFields, ...resetFields].forEach(f => {
         const input = document.getElementById(f.input);
         if (input) input.addEventListener("input", () => clearFieldError(f.input, f.error));
+    });
+
+    document.getElementById("resetCode").addEventListener("input", e => {
+        e.target.value = e.target.value.replace(/\D/g, "").slice(0, 8);
+    });
+
+    document.getElementById("resendCodeLink").addEventListener("click", async e => {
+        e.preventDefault();
+        if (resetFlow !== "verify") return;
+        const email = document.getElementById("resetEmail").value.trim();
+        const resendLink = e.currentTarget;
+        resendLink.textContent = "Sending...";
+        resendLink.setAttribute("aria-disabled", "true");
+        try {
+            const r = await post("/request-password-reset", { email });
+            resetMessage.textContent = r.ok
+                ? (r.data.message || "A verification code has been sent.")
+                : (r.data.error || "Unable to resend the code.");
+            resetMessage.className = "form-message " + (r.ok ? "success" : "error");
+        } catch (err) {
+            console.error("Password reset code resend error:", err);
+            resetMessage.textContent = "Unable to connect to the server.";
+            resetMessage.className = "form-message error";
+        } finally {
+            resendLink.textContent = "Resend";
+            resendLink.removeAttribute("aria-disabled");
+        }
     });
 
     document.getElementById("signInForm").addEventListener("submit", async e => {
@@ -263,7 +722,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            navigateToDashboard(displayName(r.data.user));
+            navigateToDashboard(displayName(r.data.user), r.data.user.role);
         } catch (err) {
             console.error("Login error:", err);
             msg.textContent = "Unable to connect to the server.";
@@ -340,7 +799,61 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("resetForm").addEventListener("submit", async e => {
         e.preventDefault();
-        if (!firstLoginMode) return;
+        clearErrors(resetFields);
+        resetMessage.textContent = "";
+        resetMessage.className = "form-message";
+
+        if (resetFlow === "request") {
+            const email = document.getElementById("resetEmail").value.trim();
+            if (!isValidEmail(email)) {
+                setFieldError("resetEmail", "resetEmailError", "Enter a valid email address.");
+                return;
+            }
+
+            try {
+                const r = await post("/request-password-reset", { email });
+                if (!r.ok) {
+                    resetMessage.textContent = r.data.error || "Unable to send a verification code.";
+                    resetMessage.className = "form-message error";
+                    return;
+                }
+
+                showResetCode();
+                resetMessage.textContent = r.data.message || "A verification code has been sent.";
+                resetMessage.className = "form-message success";
+            } catch (err) {
+                console.error("Password reset request error:", err);
+                resetMessage.textContent = "Unable to connect to the server.";
+                resetMessage.className = "form-message error";
+            }
+            return;
+        }
+
+        if (resetFlow === "verify") {
+            const email = document.getElementById("resetEmail").value.trim();
+            const code = document.getElementById("resetCode").value.trim();
+            if (!/^\d{8}$/.test(code)) {
+                setFieldError("resetCode", "resetCodeError", "Enter the eight-digit code from your email.");
+                return;
+            }
+
+            try {
+                const r = await post("/verify-password-reset", { email, code });
+                if (!r.ok || !r.data.access_token) {
+                    resetMessage.textContent = r.data.error || "The code could not be verified.";
+                    resetMessage.className = "form-message error";
+                    return;
+                }
+
+                recoveryAccessToken = r.data.access_token;
+                showVerifiedResetPassword();
+            } catch (err) {
+                console.error("Password reset verification error:", err);
+                resetMessage.textContent = "Unable to connect to the server.";
+                resetMessage.className = "form-message error";
+            }
+            return;
+        }
 
         const npwd = document.getElementById("newPassword").value;
         const cpwd = document.getElementById("confirmNewPassword").value;
@@ -348,16 +861,43 @@ document.addEventListener("DOMContentLoaded", function () {
         if (npwd !== cpwd) { setFieldError("confirmNewPassword", "confirmNewPasswordError", "Passwords do not match."); return; }
 
         try {
-            const token = sessionStorage.getItem("access_token");
-            const r = await post("/set-password", { newPassword: npwd }, token);
-            if (!r.ok) { setFieldError("newPassword", "newPasswordError", r.data.error || "Could not save password."); return; }
+            const token = firstLoginMode
+                ? sessionStorage.getItem("access_token")
+                : recoveryAccessToken;
+            const endpoint = firstLoginMode ? "/set-password" : "/reset-password";
+            const r = await post(endpoint, { newPassword: npwd }, token);
+            if (!r.ok) {
+                const error = r.data.error || (firstLoginMode ? "Could not save password." : "Could not reset password.");
+                if (firstLoginMode) setFieldError("newPassword", "newPasswordError", error);
+                else {
+                    resetMessage.textContent = error;
+                    resetMessage.className = "form-message error";
+                }
+                return;
+            }
 
-            firstLoginMode = false;
-            const me = await fetchMe();
-            navigateToDashboard(me ? displayName(me) : "User");
+            if (firstLoginMode) {
+                firstLoginMode = false;
+                resetFlow = "request";
+                const me = await fetchMe();
+                navigateToDashboard(me ? displayName(me) : "User", me ? me.role : "user");
+                return;
+            }
+
+            recoveryAccessToken = "";
+            resetFlow = "complete";
+            document.getElementById("newPasswordGroup").classList.add("hidden");
+            document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
+            document.getElementById("resetSubmitButton").classList.add("hidden");
+            resetMessage.textContent = "Password reset successfully. You can now sign in.";
+            resetMessage.className = "form-message success";
         } catch (err) {
-            console.error("Set password error:", err);
-            setFieldError("newPassword", "newPasswordError", "Unable to connect to the server.");
+            console.error("Password reset error:", err);
+            if (firstLoginMode) setFieldError("newPassword", "newPasswordError", "Unable to connect to the server.");
+            else {
+                resetMessage.textContent = "Unable to connect to the server.";
+                resetMessage.className = "form-message error";
+            }
         }
     });
 
@@ -367,7 +907,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const me = await fetchMe();
             if (!me) { clearSession(); return; }
             if (me.must_change_password) { showFirstLoginPassword(); return; }
-            navigateToDashboard(displayName(me));
+            navigateToDashboard(displayName(me), me.role);
         } catch (err) {
             console.error("Session restore failed:", err);
         }
