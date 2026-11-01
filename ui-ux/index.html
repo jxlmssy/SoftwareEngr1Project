@@ -436,7 +436,7 @@
 
             <div class="auth-screen hidden" id="resetScreen">
                 <h2 class="modal-title-main" id="resetHeading">Reset password</h2>
-                <p class="modal-subtitle" id="resetSubtitle">Enter your email address to receive an eight-digit reset code.</p>
+                <p class="modal-subtitle" id="resetSubtitle">Enter your email or username to receive a reset code.</p>
 
                 <form id="resetForm" novalidate>
                     <div class="form-group" id="resetEmailGroup">
@@ -445,15 +445,11 @@
                         <small class="field-error" id="resetEmailError"></small>
                     </div>
                     <div class="form-group hidden" id="resetCodeGroup">
-<<<<<<< HEAD
                         <label for="resetCode">Verification Code</label>
                         <input type="text" id="resetCode" placeholder="8-digit code" maxlength="8" inputmode="numeric" autocomplete="one-time-code">
-=======
-                        <label for="resetCode">Eight-digit verification code</label>
-                        <input type="text" id="resetCode" placeholder="Enter code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}">
->>>>>>> origin/main
                         <small class="field-error" id="resetCodeError"></small>
-                        <div class="resend-code"><span>Didn't receive a code?</span> <a href="#" id="resendCodeLink">Resend code</a></div>
+                        <div class="resend-code"><span>Didn't get code?</span> <a href="#" id="resendCodeLink">Resend</a></div>
+                        <p class="resend-message" id="resendMessage"></p>
                     </div>
                     <div class="form-group hidden" id="newPasswordGroup">
                         <label for="newPassword">New Password</label>

@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const registerScreen = document.getElementById("registerScreen");
     const resetScreen = document.getElementById("resetScreen");
     const resetMessage = document.getElementById("resetMessage");
-<<<<<<< HEAD
     const userManagementNav = document.getElementById("userManagementNav");
     const administrationLabel = document.getElementById("administrationLabel");
     const dashboardHome = document.getElementById("dashboardHome");
@@ -22,8 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentUserRole = "user";
     let usersLoaded = false;
     let usersById = new Map();
-=======
->>>>>>> origin/main
 
     const coverCards = document.querySelectorAll(".coverflow-card");
     const prevSlideBtn = document.getElementById("prevSlideBtn");
@@ -133,53 +130,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function showScreen(screen) {
         [signInScreen, registerScreen, resetScreen].forEach(s => s.classList.add("hidden"));
         screen.classList.remove("hidden");
-    }
-
-    function showResetRequest() {
-        firstLoginMode = false;
-        resetFlow = "request";
-        recoveryAccessToken = "";
-        document.getElementById("resetForm").reset();
-        document.getElementById("resetEmail").readOnly = false;
-        document.getElementById("resetHeading").textContent = "Reset password";
-        document.getElementById("resetSubtitle").textContent = "Enter your email address and we'll send you an eight-digit verification code.";
-        document.getElementById("resetEmailGroup").classList.remove("hidden");
-        document.getElementById("resetCodeGroup").classList.add("hidden");
-        document.getElementById("newPasswordGroup").classList.add("hidden");
-        document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
-        document.getElementById("resetSubmitButton").classList.remove("hidden");
-        document.getElementById("resetSubmitButton").textContent = "Send Code";
-        resetMessage.textContent = "";
-        resetMessage.className = "form-message";
-        openModal(resetScreen);
-    }
-
-    function showResetCode() {
-        resetFlow = "verify";
-        document.getElementById("resetHeading").textContent = "Reset your password";
-        document.getElementById("resetSubtitle").textContent = "Enter the eight-digit code sent to your email.";
-        document.getElementById("resetEmail").readOnly = true;
-        document.getElementById("resetEmailGroup").classList.remove("hidden");
-        document.getElementById("resetCodeGroup").classList.remove("hidden");
-        document.getElementById("newPasswordGroup").classList.add("hidden");
-        document.getElementById("confirmNewPasswordGroup").classList.add("hidden");
-        document.getElementById("resetSubmitButton").classList.remove("hidden");
-        document.getElementById("resetSubmitButton").textContent = "Verify Code";
-    }
-
-    function showVerifiedResetPassword() {
-        resetFlow = "recovery";
-        document.getElementById("resetHeading").textContent = "Choose a new password";
-        document.getElementById("resetSubtitle").textContent = "Enter and confirm your new password to finish resetting your account.";
-        document.getElementById("resetEmail").readOnly = true;
-        document.getElementById("resetEmailGroup").classList.remove("hidden");
-        document.getElementById("resetCodeGroup").classList.add("hidden");
-        document.getElementById("newPasswordGroup").classList.remove("hidden");
-        document.getElementById("confirmNewPasswordGroup").classList.remove("hidden");
-        document.getElementById("resetSubmitButton").classList.remove("hidden");
-        document.getElementById("resetSubmitButton").textContent = "Reset Password";
-        resetMessage.textContent = "";
-        resetMessage.className = "form-message";
+        if (screen === resetScreen) {
+            firstLoginMode = false;
+            document.getElementById("resetForm").reset();
+        }
     }
 
     function showFirstLoginPassword() {
@@ -706,10 +660,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("resendCodeLink").addEventListener("click", async e => {
         e.preventDefault();
-<<<<<<< HEAD
         if (resetFlow !== "verify") return;
-=======
->>>>>>> origin/main
         const email = document.getElementById("resetEmail").value.trim();
         const resendLink = e.currentTarget;
         resendLink.textContent = "Sending...";
@@ -717,11 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const r = await post("/request-password-reset", { email });
             resetMessage.textContent = r.ok
-<<<<<<< HEAD
                 ? (r.data.message || "A verification code has been sent.")
-=======
-                ? r.data.message
->>>>>>> origin/main
                 : (r.data.error || "Unable to resend the code.");
             resetMessage.className = "form-message " + (r.ok ? "success" : "error");
         } catch (err) {
@@ -729,11 +676,7 @@ document.addEventListener("DOMContentLoaded", function () {
             resetMessage.textContent = "Unable to connect to the server.";
             resetMessage.className = "form-message error";
         } finally {
-<<<<<<< HEAD
             resendLink.textContent = "Resend";
-=======
-            resendLink.textContent = "Resend code";
->>>>>>> origin/main
             resendLink.removeAttribute("aria-disabled");
         }
     });
@@ -876,11 +819,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
                 showResetCode();
-<<<<<<< HEAD
                 resetMessage.textContent = r.data.message || "A verification code has been sent.";
-=======
-                resetMessage.textContent = r.data.message;
->>>>>>> origin/main
                 resetMessage.className = "form-message success";
             } catch (err) {
                 console.error("Password reset request error:", err);
@@ -900,11 +839,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             try {
                 const r = await post("/verify-password-reset", { email, code });
-<<<<<<< HEAD
                 if (!r.ok || !r.data.access_token) {
-=======
-                if (!r.ok) {
->>>>>>> origin/main
                     resetMessage.textContent = r.data.error || "The code could not be verified.";
                     resetMessage.className = "form-message error";
                     return;
@@ -926,7 +861,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (npwd !== cpwd) { setFieldError("confirmNewPassword", "confirmNewPasswordError", "Passwords do not match."); return; }
 
         try {
-<<<<<<< HEAD
             const token = firstLoginMode
                 ? sessionStorage.getItem("access_token")
                 : recoveryAccessToken;
@@ -947,26 +881,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 resetFlow = "request";
                 const me = await fetchMe();
                 navigateToDashboard(me ? displayName(me) : "User", me ? me.role : "user");
-=======
-            if (resetFlow === "first-login") {
-                const token = sessionStorage.getItem("access_token");
-                const r = await post("/set-password", { newPassword: npwd }, token);
-                if (!r.ok) {
-                    setFieldError("newPassword", "newPasswordError", r.data.error || "Could not save password.");
-                    return;
-                }
-
-                firstLoginMode = false;
-                const me = await fetchMe();
-                navigateToDashboard(me ? displayName(me) : "User");
-                return;
-            }
-
-            const r = await post("/reset-password", { newPassword: npwd }, recoveryAccessToken);
-            if (!r.ok) {
-                resetMessage.textContent = r.data.error || "Could not reset password.";
-                resetMessage.className = "form-message error";
->>>>>>> origin/main
                 return;
             }
 
@@ -979,16 +893,11 @@ document.addEventListener("DOMContentLoaded", function () {
             resetMessage.className = "form-message success";
         } catch (err) {
             console.error("Password reset error:", err);
-<<<<<<< HEAD
             if (firstLoginMode) setFieldError("newPassword", "newPasswordError", "Unable to connect to the server.");
             else {
                 resetMessage.textContent = "Unable to connect to the server.";
                 resetMessage.className = "form-message error";
             }
-=======
-            resetMessage.textContent = "Unable to connect to the server.";
-            resetMessage.className = "form-message error";
->>>>>>> origin/main
         }
     });
 
