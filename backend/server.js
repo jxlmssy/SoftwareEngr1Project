@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const crypto = require("node:crypto");
 require("dotenv").config();
 
 const { createClient } = require("@supabase/supabase-js");
@@ -11,8 +12,6 @@ app.use(express.json());
 
 const path = require('path');
 app.use(express.static(path.join(__dirname, '..', 'ui-ux')));
-
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
 
 const opts = { auth: { autoRefreshToken: false, persistSession: false } };
 
@@ -101,6 +100,133 @@ app.post("/api/register", async (req, res) => {
     } catch (err) {
         console.error("Registration error:", err);
         res.status(500).json({ error: "Server error during registration." });
+    }
+});
+
+app.post("/api/request-password-reset", async (req, res) => {
+    const email = req.body && typeof req.body.email === "string" ? req.body.email.trim() : "";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: "Enter a valid email address." });
+    }
+
+    try {
+        const { error } = await authClient.auth.resetPasswordForEmail(email);
+        if (error) {
+            console.error("Password reset request error:", error);
+            return res.status(500).json({ error: "Unable to send a verification code right now. Please try again later." });
+        }
+
+        res.json({
+            message: "Verification code sent."
+        });
+    } catch (err) {
+        console.error("Password reset request error:", err);
+        res.status(500).json({ error: "Unable to send a verification code right now. Please try again later." });
+    }
+});
+
+app.post("/api/verify-password-reset", async (req, res) => {
+    const email = req.body && typeof req.body.email === "string" ? req.body.email.trim() : "";
+    const code = req.body && typeof req.body.code === "string" ? req.body.code.trim() : "";
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{8}$/.test(code)) {
+        return res.status(400).json({ error: "Enter a valid email address and eight-digit verification code." });
+    }
+
+    try {
+        const { data, error } = await authClient.auth.verifyOtp({
+            email,
+            token: code,
+            type: "recovery"
+        });
+        if (error || !data.session) {
+            return res.status(400).json({ error: "The verification code is invalid or has expired. Request a new code." });
+        }
+
+        const token = data.session.access_token;
+        const claims = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
+        const expiresAt = new Date(claims.exp * 1000);
+        if (!Number.isFinite(expiresAt.getTime()) || expiresAt <= new Date()) {
+            return res.status(400).json({ error: "The verification code is invalid or has expired. Request a new code." });
+        }
+
+        const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+        const { error: tokenError } = await admin.from("password_reset_token").insert({
+            user_id: data.user.id,
+            token_hash: tokenHash,
+            expires_at: expiresAt.toISOString()
+        });
+        if (tokenError) {
+            if (tokenError.code === "23505") {
+                return res.status(400).json({ error: "This verification code has already been used. Request a new code." });
+            }
+            console.error("Password reset verification token error:", tokenError);
+            return res.status(500).json({ error: "Unable to verify the code right now. Please try again later." });
+        }
+
+        res.json({ access_token: token });
+    } catch (err) {
+        console.error("Password reset verification error:", err);
+        res.status(500).json({ error: "Unable to verify the code right now. Please try again later." });
+    }
+});
+
+app.post("/api/reset-password", async (req, res) => {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    const newPassword = req.body && req.body.newPassword;
+
+    if (!token) return res.status(400).json({ error: "The verification code is invalid or has expired. Request a new code." });
+    if (typeof newPassword !== "string" || newPassword.length < 8) {
+        return res.status(400).json({ error: "Password must be at least 8 characters." });
+    }
+
+    try {
+        const { data, error } = await admin.auth.getUser(token);
+        if (error || !data.user) {
+            return res.status(400).json({ error: "The verification code is invalid or has expired. Request a new code." });
+        }
+
+        const claims = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
+        const expiresAt = new Date(claims.exp * 1000);
+        if (!Number.isFinite(expiresAt.getTime()) || expiresAt <= new Date()) {
+            return res.status(400).json({ error: "The verification code is invalid or has expired. Request a new code." });
+        }
+
+        const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+        const { data: resetToken, error: tokenError } = await admin
+            .from("password_reset_token")
+            .update({ is_used: true })
+            .eq("user_id", data.user.id)
+            .eq("token_hash", tokenHash)
+            .eq("is_used", false)
+            .gt("expires_at", new Date().toISOString())
+            .select("reset_id")
+            .maybeSingle();
+        if (tokenError) {
+            console.error("Password reset token error:", tokenError);
+            return res.status(500).json({ error: "Unable to reset the password right now. Please try again later." });
+        }
+        if (!resetToken) {
+            return res.status(400).json({ error: "The verification code is invalid, expired, or already used. Request a new code." });
+        }
+
+        const { error: updateError } = await admin.auth.admin.updateUserById(data.user.id, {
+            password: newPassword
+        });
+        if (updateError) {
+            const { error: rollbackError } = await admin
+                .from("password_reset_token")
+                .update({ is_used: false })
+                .eq("reset_id", resetToken.reset_id);
+            if (rollbackError) console.error("Password reset token rollback error:", rollbackError);
+            console.error("Password reset error:", updateError);
+            return res.status(500).json({ error: "Unable to reset the password right now. Please try again later." });
+        }
+
+        res.json({ message: "Password reset successfully." });
+    } catch (err) {
+        console.error("Password reset error:", err);
+        res.status(500).json({ error: "Unable to reset the password right now. Please try again later." });
     }
 });
 
