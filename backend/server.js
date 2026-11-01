@@ -72,7 +72,7 @@ function requirePasswordSet(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-    if (!["admin", "superadmin"].includes(req.profile.role)) return res.status(403).json({ error: "Admins only." });
+    if (req.profile.role !== "admin") return res.status(403).json({ error: "Admins only." });
     next();
 }
 
@@ -84,7 +84,7 @@ async function requireManageableUser(req, res, next) {
         .maybeSingle();
     if (error) return res.status(500).json({ error: "Unable to verify the target account." });
     if (!data || data.is_deleted) return res.status(404).json({ error: "User not found." });
-    if (req.profile.role !== "superadmin" && ["admin", "superadmin"].includes(String(data.role).toLowerCase())) {
+    if (String(data.role).toLowerCase() === "admin") {
         return res.status(403).json({ error: "Admins cannot manage other admin accounts." });
     }
     req.targetProfile = data;
@@ -310,7 +310,7 @@ app.get("/api/admin/users", requireAuth, requirePasswordSet, requireAdmin, async
 
     const authUsersById = new Map(authUsers.map(user => [user.id, user]));
     const users = (data || [])
-        .filter(user => req.profile.role === "superadmin" || String(user.role).toLowerCase() !== "superadmin")
+        .filter(user => String(user.role).toLowerCase() !== "superadmin")
         .map(user => {
             const authUser = authUsersById.get(user.id);
             const metadata = authUser ? authUser.user_metadata || {} : {};
@@ -331,9 +331,9 @@ app.put("/api/admin/users/:id", requireAuth, requirePasswordSet, requireAdmin, r
     const status = typeof req.body.status === "string" ? req.body.status.trim().toLowerCase() : "";
     if (firstName.length > 100 || lastName.length > 100) return res.status(400).json({ error: "Names must be 100 characters or fewer." });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: "Enter a valid email address." });
-    if (!["user", "admin", "superadmin"].includes(role)) return res.status(400).json({ error: "Select a valid role." });
-    if (req.profile.role !== "superadmin" && role !== "user") {
-        return res.status(403).json({ error: "Only a superadmin can assign admin roles." });
+    if (!["user", "admin"].includes(role)) return res.status(400).json({ error: "Select a valid role." });
+    if (role !== "user") {
+        return res.status(403).json({ error: "Admin roles cannot be assigned." });
     }
     if (!["active", "inactive", "pending", "blocked", "disapproved"].includes(status)) {
         return res.status(400).json({ error: "Select a valid account status." });
@@ -421,9 +421,9 @@ app.post("/api/admin/users", requireAuth, requirePasswordSet, requireAdmin, asyn
         return res.status(400).json({ error: "Email and a temporary password (min 8 chars) are required." });
     }
     if (firstName.length > 100 || lastName.length > 100) return res.status(400).json({ error: "Names must be 100 characters or fewer." });
-    if (!["user", "admin", "superadmin"].includes(role)) return res.status(400).json({ error: "Select a valid role." });
-    if (req.profile.role !== "superadmin" && role !== "user") {
-        return res.status(403).json({ error: "Only a superadmin can create admin accounts." });
+    if (!["user", "admin"].includes(role)) return res.status(400).json({ error: "Select a valid role." });
+    if (role !== "user") {
+        return res.status(403).json({ error: "Admin accounts cannot be created." });
     }
     if (!["active", "inactive", "pending", "blocked", "disapproved"].includes(status)) {
         return res.status(400).json({ error: "Select a valid account status." });
