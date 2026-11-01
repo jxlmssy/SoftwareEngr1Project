@@ -43,9 +43,9 @@ This document outlines the core wireframes and structural user interface specifi
 	- **Footer:** Back to Login link.   
 
 	**4. Verify Code (Step 2 - Verification)**
-	- **Header:** Title "Reset your password", helper text "Enter the 6-digit code sent to your email.", and an x close button.   
+	- **Header:** Title "Reset your password", helper text "Enter the 8-digit code sent to your email.", and an x close button.   
 	- **Input Fields:** Email Address (Pre-filled with user's email, e.g., you@gmail.com) 
-	- **Verification Code** (Placeholder: "6-digit code")   
+	- **Verification Code** (Placeholder: "8-digit code")   
 	- **Secondary Link:** "Didn't get code? Resend" link.   
 	- **Primary Action:** Verify Code button.   
 	- **Footer:** Back to Login link.   

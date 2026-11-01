@@ -73,7 +73,7 @@ Roles: Superadmin, Admin, User. Statuses: Active, Pending, Blocked, Disapproved.
 
 **Register:** username min 3 characters; valid email; password min 8 characters; confirm password must match.
 
-**Forgot password flow:** email → 6-digit code → new password (min 8, must match) → back to login.
+**Forgot password flow:** email → 8-digit code → new password (min 8, must match) → back to login.
 
 **Add / Edit User:** first name, last name and a valid email are required. Role and status are dropdowns.
 
