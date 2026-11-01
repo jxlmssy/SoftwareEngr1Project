@@ -2,7 +2,9 @@
 body { font-family: 'Inter Variable', 'Inter', sans-serif; background-color: #0b0d17; color: #f8fafc; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
 .hidden { display: none !important; }
 
-#landingView, #dashboardView { width: 100%; min-height: 100vh; background-color: #0b0d17; color: #f8fafc; animation: fadeIn 0.3s ease-in-out; }
+#landingView .navbar{ width: auto; margin-left: -1in; margin-right: -1in; padding-left: 1in; padding-right: 1in;}
+#landingView{ width: 100%; padding-left: 1in; padding-right: 1in; min-height: 100vh; background-color: #0b0d17; color: #f8fafc; animation: fadeIn 0.3s ease-in-out;}
+#dashboardView { width: 100%; min-height: 100vh; background-color: #0b0d17; color: #f8fafc; animation: fadeIn 0.3s ease-in-out; }
 #dashboardView { display: flex; flex-direction: column; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
