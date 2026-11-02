@@ -1,7 +1,7 @@
 # Wireframes Main Page, User Management List and Rights Dialog
-![alt text](<wireframe main page (dashboard).png>)
-![alt text](<wireframe user management.png>)
-![alt text](<Rights Dialog.png>)
+<img width="1578" height="914" alt="dashboard (main page)" src="https://github.com/user-attachments/assets/0e323722-3655-4276-9b7d-15796b458b43">
+<img width="1578" height="914" alt="user management" src="https://github.com/user-attachments/assets/117d764c-42a2-4fe4-9491-4ffb687bace0" />
+<img width="685" height="373" alt="Rights Dialog" src="https://github.com/user-attachments/assets/933016e3-ed86-4c26-9d6b-a97bbe9e3348" />
 
 # Description
 This document outlines the core wireframe designs, and UI structure for task **[S1-UIX-03]**. It establishes the complete administrative dashboard (main page) layout, user management table, user edit modal, and detailed pe  rmission/rights management dialog for the Tiramis-u, Inc. ERP system.
