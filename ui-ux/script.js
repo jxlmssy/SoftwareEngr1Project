@@ -291,12 +291,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     ? { label: "Disapproved", className: "blocked" }
                     : user.is_blocked
                         ? { label: "Blocked", className: "blocked" }
-                        : inactive
+                           : (profileStatus === "inactive" || (profileStatus === "approved" && inactive))
                             ? { label: "Inactive", className: "inactive" }
-                            : (!active || profileStatus !== "approved")
-                                ? { label: "Pending", className: "pending" }
-                                : { label: "Active", className: "active" };
-
+                            : (profileStatus === "approved" && active)
+                                ? { label: "Active", className: "active" }
+                                : { label: "Pending", className: "pending" };
+                                
             const emailName = [user.first_name, user.last_name].filter(Boolean).join(" ") ||
                 (user.email || "").split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, char => char.toUpperCase()) ||
                 "User";
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const actions = document.createElement("div");
             actions.className = "user-actions-cell";
             const canManageTarget = currentUserRole === "superadmin" || !["admin", "superadmin"].includes(role);
-            const requiresApproval = !["approved", "rejected"].includes(profileStatus);
+            const requiresApproval = status.label === "Pending";
             if (canManageTarget && requiresApproval && !user.is_blocked && !user.is_deleted) {
                 actions.append(createUserAction("Approve", "approve", user.id, "approve"));
                 actions.append(createUserAction("Disapprove", "disapprove", user.id, "disapprove"));
