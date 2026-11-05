@@ -323,29 +323,27 @@ app.get("/api/admin/users", requireAuth, requirePasswordSet, requireAdmin, async
     res.json({ users });
 });
 
-app.get("/api/customer", requireAuth, async (req, res) => {
-  const { data, error } = await admin
-    .from("customer").select("custno, custname, address, payterm")
-    .order("custno", { ascending: false });
-  if (error) return res.status(500).json({ error: "Unable to load customers." });
-  res.json({ rows: data });
-});
+app.get("/api/rights-catalogue", requireAuth, requirePasswordSet, requireAdmin, async (req, res) => {
+    try {
+        const { data, error } = await admin
+            .from("rights_catalogue")
+            .select("right_id, right_name")
+            .eq("is_deleted", false)
+            .order("right_name", { ascending: true });
 
-app.get("/api/product", requireAuth, async (req, res) => {
-  const { data, error } = await admin
-  .from("product").select("prodcode, description, unit, price").order("prodcode");
-  if (error) return res.status(500).json({ error: "Unable to load products." });
-  res.json({ rows: data });
-});
+        if (error) throw error;
 
-app.get("/api/sales", requireAuth, async (req, res) => {
-  const { data, error } = await admin
-    .from("sales").select("transno, salesdate, custno, empno")
-    .order("salesdate", { ascending: false });
-  if (error) return res.status(500).json({ error: "Unable to load sales." });
-  res.json({ rows: data.map(s => ({
-    id: s.transno, salesdate: s.salesdate, custno: s.custno, empno: s.empno
-  })) });
+        res.json({
+            rights: data || []
+        });
+
+    } catch (error) {
+        console.error("Rights catalogue error:", error);
+
+        res.status(500).json({
+            error: "Unable to load rights catalogue."
+        });
+    }
 });
 
 app.put("/api/admin/users/:id", requireAuth, requirePasswordSet, requireAdmin, requireManageableUser, async (req, res) => {
@@ -394,6 +392,154 @@ app.put("/api/admin/users/:id", requireAuth, requirePasswordSet, requireAdmin, r
     }
     res.json({ message: "User account updated." });
 });
+
+// GET USER RIGHTS
+
+app.get("/api/admin/users/:id/rights", requireAuth, requirePasswordSet, requireAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Retrieve the user's saved permissions.
+        const { data: authData, error: authError } =
+            await admin.auth.admin.getUserById(userId);
+
+        if (authError || !authData.user) {
+            return res.status(404).json({
+                error: "User not found."
+            });
+        }
+
+        const savedPermissions =
+            authData.user.app_metadata?.permissions || [];
+
+        res.json({
+            permissions: savedPermissions
+        });
+
+    } catch (error) {
+        console.error("Load rights error:", error);
+
+        res.status(500).json({
+            error: "Unable to load rights."
+        });
+    }
+});
+
+
+
+// SAVE USER RIGHTS
+app.put("/api/admin/users/:id/rights", requireAuth, requirePasswordSet, requireAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const permissions = req.body.permissions;
+
+        if (!Array.isArray(permissions)) {
+            return res.status(400).json({
+                error: "Permissions must be an array."
+            });
+        }
+
+        // Confirm the selected user exists.
+        const { data: user, error: userError } = await admin
+            .from("app_users")
+            .select("id, role")
+            .eq("id", userId)
+            .maybeSingle();
+
+        if (userError) throw userError;
+
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found."
+            });
+        }
+
+        // Load active rights from the catalogue.
+        const { data: catalogue, error: catalogueError } = await admin
+            .from("rights_catalogue")
+            .select("right_id, right_name")
+            .eq("is_deleted", false);
+
+        if (catalogueError) throw catalogueError;
+
+        const validRights = new Map(
+            (catalogue || []).map(right => [
+                Number(right.right_id),
+                right.right_name
+            ])
+        );
+
+        const modulePrefixes = {
+            1: "customer_",
+            2: "product_",
+            3: "hr_",
+            4: "sales_",
+            5: "reports_"
+        };
+
+        const savedPermissions = [];
+        const seen = new Set();
+
+        for (const permission of permissions) {
+            const moduleId = Number(permission.module_id);
+            const rightId = Number(permission.right_id);
+            const rightName = validRights.get(rightId);
+
+            if (!Number.isInteger(moduleId) || !modulePrefixes[moduleId]) {
+                return res.status(400).json({
+                    error: "Invalid module selected."
+                });
+            }
+
+            if (!rightName || !rightName.startsWith(modulePrefixes[moduleId])) {
+                return res.status(400).json({
+                    error: "Invalid right selected for this module."
+                });
+            }
+
+            const key = `${moduleId}-${rightId}`;
+
+            if (seen.has(key)) continue;
+            seen.add(key);
+
+            savedPermissions.push({
+                module_id: moduleId,
+                right_id: rightId
+            });
+        }
+
+        // Preserve existing app_metadata and replace only permissions.
+        const { data: authData, error: authError } =
+            await admin.auth.admin.getUserById(userId);
+
+        if (authError) throw authError;
+
+        const existingMetadata = authData.user.app_metadata || {};
+
+        const { error: updateError } =
+            await admin.auth.admin.updateUserById(userId, {
+                app_metadata: {
+                    ...existingMetadata,
+                    permissions: savedPermissions
+                }
+            });
+
+        if (updateError) throw updateError;
+
+        res.json({
+            message: "Rights saved successfully.",
+            count: savedPermissions.length
+        });
+
+    } catch (error) {
+        console.error("Save rights error:", error);
+
+        res.status(500).json({
+            error: "Unable to save rights."
+        });
+    }
+});
+
 
 app.post("/api/admin/users/:id/approve", requireAuth, requirePasswordSet, requireAdmin, requireManageableUser, requirePendingUser, async (req, res) => {
     const { error } = await admin

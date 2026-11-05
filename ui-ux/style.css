@@ -192,6 +192,48 @@ body { font-family: 'Inter Variable', 'Inter', sans-serif; background-color: #0b
 .resend-code { display: flex; flex-wrap: wrap; gap: 5px; font-size: 11px; margin-top: 8px; color: #777b8d; }
 .resend-message { font-size: 11px; color: #23834d; margin-top: 6px; }
 
+/* APPEND to the end of style.css (before the @media blocks if you want it to be overridable) */
+
+.rights-card { max-width: 592px; padding: 32px 28px 24px; }
+.rights-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+
+.rights-section { position: relative; border: 1px solid #dfe1e9; border-radius: 16px; padding: 16px 14px 10px; }
+.rights-section.full { grid-column: 1 / -1; }
+.rights-section h3 { margin: 0 0 12px; color: #25283a; font-size: 16px; font-weight: 700; }
+
+.rights-toggles { position: absolute; top: 8px; right: 10px; display: flex; gap: 4px; }
+.rights-toggles button {
+    padding: 1px 6px; border: 1px solid #c9c9ce; border-radius: 4px;
+    background: #ececef; color: #555; font-size: 10px; cursor: pointer;
+}
+.rights-toggles button:hover { background: #dedee3; }
+
+.rights-options { display: grid; gap: 10px 8px; padding-bottom: 6px; }
+.rights-options.cols-1 { grid-template-columns: 1fr; }
+.rights-options.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.rights-options.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+.rights-options label { display: flex; align-items: center; gap: 8px; color: #4a4450; font-size: 13.5px; cursor: pointer; }
+.rights-options input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 17px; height: 17px; margin: 0; flex: none;
+    border: 1.5px solid #9a9a9f; border-radius: 4px; background: #fff;
+    display: grid; place-content: center; cursor: pointer;
+}
+.rights-options input[type="checkbox"]:checked { background: #171da2; border-color: #171da2; }
+.rights-options input[type="checkbox"]:checked::after {
+    content: ""; width: 4px; height: 8px;
+    border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+
+#rightsModal .primary-modal-btn { background: #171da2; min-height: 54px; }
+
+@media (max-width: 560px) {
+    .rights-grid { grid-template-columns: 1fr; }
+    .rights-options.cols-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 900px) {
     .hero-section, .features-section-split, .dash-cards-grid { grid-template-columns: 1fr; }
     .dash-content { padding: 24px 16px; }
