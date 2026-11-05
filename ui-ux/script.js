@@ -205,6 +205,8 @@ document.addEventListener("DOMContentLoaded", function () {
         currentUserRole = ["admin", "superadmin"].includes(String(role || "").toLowerCase())
             ? String(role).toLowerCase()
             : "user";
+            resetDashboardState();
+
         document.getElementById("dashUserName").textContent = userName;
         const roleBadge = document.getElementById("dashUserRole");
         roleBadge.textContent = currentUserRole === "superadmin"
@@ -214,7 +216,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const canManageUsers = ["admin", "superadmin"].includes(currentUserRole);
         userManagementNav.classList.toggle("hidden", !canManageUsers);
         administrationLabel.classList.toggle("hidden", !canManageUsers);
-        if (!canManageUsers && userManagementView) showDashboardPage("dashboard");
         document.getElementById("bannerUserName").textContent = userName.split(" ")[0];
         closeModal();
         landingView.classList.add("hidden");
@@ -304,8 +305,13 @@ document.addEventListener("DOMContentLoaded", function () {
             row.append(createUserCell(user.email, "user-email-cell"));
 
             const roleCell = document.createElement("td");
+            const roleClasses = {
+            superadmin: "superadmin-role",
+            admin: "admin-role"
+            };
+
             const roleBadge = document.createElement("span");
-            roleBadge.className = "role-badge " + (role === "admin" || role === "superadmin" ? "admin-role" : "user-role");
+            roleBadge.className = "role-badge " + (roleClasses[role] || "user-role");
             roleBadge.textContent = role === "superadmin" ? "Superadmin" : role.charAt(0).toUpperCase() + role.slice(1);
             roleCell.append(roleBadge);
             row.append(roleCell);
@@ -491,6 +497,16 @@ document.addEventListener("DOMContentLoaded", function () {
         window.scrollTo(0, 0);
     }
 
+    function resetDashboardState() {
+    usersLoaded = false;
+    usersById = new Map();
+    usersTableBody.replaceChildren();
+    showUserManagementFeedback("", false);
+    closeAddUserModal();
+    closeEditUserModal();
+    showDashboardPage("dashboard");   // always start on the dashboard home
+    }
+
     function setFieldError(inputId, errorId, msg) {
         document.getElementById(inputId).classList.add("invalid");
         document.getElementById(inputId).classList.remove("valid");
@@ -543,7 +559,7 @@ document.addEventListener("DOMContentLoaded", function () {
         await post("/logout", {}, token).catch(() => {});
         clearSession();
         currentUserRole = "user";
-        usersLoaded = false;
+        resetDashboardState();
         navigateToLanding();
     });
 
