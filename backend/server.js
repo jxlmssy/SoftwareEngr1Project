@@ -323,6 +323,31 @@ app.get("/api/admin/users", requireAuth, requirePasswordSet, requireAdmin, async
     res.json({ users });
 });
 
+app.get("/api/customer", requireAuth, async (req, res) => {
+  const { data, error } = await admin
+    .from("customer").select("custno, custname, address, payterm")
+    .order("custno", { ascending: false });
+  if (error) return res.status(500).json({ error: "Unable to load customers." });
+  res.json({ rows: data });
+});
+
+app.get("/api/product", requireAuth, async (req, res) => {
+  const { data, error } = await admin
+  .from("product").select("prodcode, description, unit, price").order("prodcode");
+  if (error) return res.status(500).json({ error: "Unable to load products." });
+  res.json({ rows: data });
+});
+
+app.get("/api/sales", requireAuth, async (req, res) => {
+  const { data, error } = await admin
+    .from("sales").select("transno, salesdate, custno, empno")
+    .order("salesdate", { ascending: false });
+  if (error) return res.status(500).json({ error: "Unable to load sales." });
+  res.json({ rows: data.map(s => ({
+    id: s.transno, salesdate: s.salesdate, custno: s.custno, empno: s.empno
+  })) });
+});
+
 app.put("/api/admin/users/:id", requireAuth, requirePasswordSet, requireAdmin, requireManageableUser, async (req, res) => {
     const firstName = typeof req.body.firstName === "string" ? req.body.firstName.trim() : "";
     const lastName = typeof req.body.lastName === "string" ? req.body.lastName.trim() : "";

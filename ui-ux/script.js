@@ -216,6 +216,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const canManageUsers = ["admin", "superadmin"].includes(currentUserRole);
         userManagementNav.classList.toggle("hidden", !canManageUsers);
         administrationLabel.classList.toggle("hidden", !canManageUsers);
+        document.querySelectorAll("[data-dashboard-page]").forEach(b => b.classList.toggle("hidden", !canViewPage(b.dataset.dashboardPage)));
         document.getElementById("bannerUserName").textContent = userName.split(" ")[0];
         closeModal();
         landingView.classList.add("hidden");
@@ -223,15 +224,29 @@ document.addEventListener("DOMContentLoaded", function () {
         window.scrollTo(0, 0);
     }
 
+    const PAGES = {
+    dashboard: { title: "Dashboard",       roles: null },
+    customers: { title: "Customers",       roles: null },
+    products:  { title: "Products",        roles: null },
+    sales:     { title: "Sales",           roles: null },
+    reports:   { title: "Reports",         roles: ["admin", "superadmin"] },
+    users:     { title: "User Management", roles: ["admin", "superadmin"] }
+    };
+
+    function canViewPage(page) {
+        const p = PAGES[page];
+        return Boolean(p) && (!p.roles || p.roles.includes(currentUserRole));
+    }
+
     function showDashboardPage(page) {
-        const showUsers = page === "users" && ["admin", "superadmin"].includes(currentUserRole);
-        dashboardHome.classList.toggle("hidden", showUsers);
-        userManagementView.classList.toggle("hidden", !showUsers);
-        document.querySelector(".dash-page-title").textContent = showUsers ? "User Management" : "Dashboard";
-        document.querySelectorAll("[data-dashboard-page]").forEach(button => {
-            button.classList.toggle("active", button.dataset.dashboardPage === (showUsers ? "users" : "dashboard"));
-        });
-        if (showUsers && !usersLoaded) loadUsers();
+        if (!canViewPage(page)) page = "dashboard";
+        document.querySelectorAll("[data-page-view]").forEach(el =>
+            el.classList.toggle("hidden", el.dataset.pageView !== page));
+        document.querySelector(".dash-page-title").textContent = PAGES[page].title;
+        document.querySelectorAll("[data-dashboard-page]").forEach(b =>
+            b.classList.toggle("active", b.dataset.dashboardPage === page));
+        if (page === "users" && !usersLoaded) loadUsers();
+        if (TABLE_PAGES[page] && !tablePagesLoaded[page]) loadTablePage(page);
     }
 
     function showUserManagementFeedback(text, isError) {
@@ -256,6 +271,88 @@ document.addEventListener("DOMContentLoaded", function () {
         button.dataset.userId = userId;
         button.textContent = label;
         return button;
+    }
+    const doll = v => "$" + Number(v || 0).toLocaleString();
+    const fmtStamp = v => v ? new Date(v).toLocaleString() : "";
+
+    function statusCell(status) {
+        const s = String(status || "pending").toLowerCase();
+        const td = document.createElement("td");
+        const badge = document.createElement("span");
+        badge.className = "status-badge " + (["blocked", "inactive", "active"].includes(s) ? s : "pending");
+        badge.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+        td.append(badge);
+        return td;
+    }
+
+    function customerActionsCell(customer) {
+        const td = document.createElement("td");
+        const wrap = document.createElement("div");
+        wrap.className = "user-actions-cell";
+        wrap.append(createUserAction("Edit ✎", "edit", customer.id, "edit"));
+        wrap.append(createUserAction("Delete", "delete", customer.id, "danger"));
+        td.append(wrap);
+        return td;
+    }
+
+        const TABLE_PAGES = {
+        customers: {
+            endpoint: "/customer",
+            body: "customersTableBody",
+            cols: [
+                "custno", "custname", "address", "payterm",
+                c => statusCell(c.status),
+                ["stamp", fmtStamp],
+                c => customerActionsCell(c)
+            ]
+        },
+        products: { endpoint: "/product", body: "productsTableBody", cols: ["prodcode", "description", "unit", ["price", doll]] },
+        sales:    { endpoint: "/sales",   body: "salesTableBody",    cols: ["id", "salesdate", "custno", "empno"] }
+        };
+        
+    const tablePagesLoaded = {};
+
+    function setTableState(tbody, text, colSpan) {
+        const row = document.createElement("tr");
+        const cell = createUserCell(text, "users-table-state");
+        cell.colSpan = colSpan;
+        row.append(cell);
+        tbody.replaceChildren(row);
+    }
+
+    async function loadTablePage(page) {
+        const cfg = TABLE_PAGES[page];
+        const tbody = document.getElementById(cfg.body);
+        setTableState(tbody, "Loading...", cfg.cols.length);
+        try {
+            const res = await fetch(API + cfg.endpoint, {
+                headers: { Authorization: "Bearer " + sessionStorage.getItem("access_token") }
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                tablePagesLoaded[page] = false;
+                setTableState(tbody, data.error || "Unable to load data.", cfg.cols.length);
+                return;
+            }
+            tablePagesLoaded[page] = true;
+            if (!data.rows || !data.rows.length) {
+                setTableState(tbody, "No records found.", cfg.cols.length);
+                return;
+            }
+            tbody.replaceChildren(...data.rows.map((item, index) => {
+                const tr = document.createElement("tr");
+                cfg.cols.forEach(col => {
+                    if (typeof col === "function") { tr.append(col(item, index)); return; }
+                    const [key, fmt] = Array.isArray(col) ? col : [col, null];
+                    tr.append(createUserCell(fmt ? fmt(item[key]) : item[key]));
+                });
+                return tr;
+            }));
+        } catch (err) {
+            console.error("Load " + page + " error:", err);
+            tablePagesLoaded[page] = false;
+            setTableState(tbody, "Unable to connect to the server.", cfg.cols.length);
+        }
     }
 
     function renderUsers(users) {
@@ -504,6 +601,7 @@ document.addEventListener("DOMContentLoaded", function () {
     showUserManagementFeedback("", false);
     closeAddUserModal();
     closeEditUserModal();
+    
     showDashboardPage("dashboard");   // always start on the dashboard home
     }
 
@@ -563,8 +661,7 @@ document.addEventListener("DOMContentLoaded", function () {
         navigateToLanding();
     });
 
-    userManagementNav.addEventListener("click", () => showDashboardPage("users"));
-    document.querySelector("[data-dashboard-page='dashboard']").addEventListener("click", () => showDashboardPage("dashboard"));
+    document.querySelectorAll("[data-dashboard-page]").forEach(b =>b.addEventListener("click", () => showDashboardPage(b.dataset.dashboardPage)));
     usersTableBody.addEventListener("click", event => {
         const button = event.target.closest("[data-user-action]");
         if (!button) return;
