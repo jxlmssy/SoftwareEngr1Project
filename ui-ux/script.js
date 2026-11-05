@@ -930,9 +930,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     
 
-    (function () {
+(function () {
     const API = "/api";
- 
     const SECTIONS = [
         { id: "customer", title: "Customer Management", cols: 1, items: [
             "Add Customer", "Delete Customer", "Edit Customer"
@@ -962,7 +961,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const saveBtn = document.getElementById("saveRightsBtn");
     let currentUserId = null;
 
-const MODULE_IDS = {
+    const MODULE_IDS = {
     customer: 1,
     product: 2,
     hr: 3,
@@ -970,61 +969,61 @@ const MODULE_IDS = {
     reports: 5
 };
 
-let rightsCatalogue = [];
-let rightIdByName = new Map();
-let rightsCatalogueLoaded = false;
+    let rightsCatalogue = [];
+    let rightIdByName = new Map();
+    let rightsCatalogueLoaded = false;
 
-const RIGHT_NAME_MAP = {
-    customer: {
-        "Add Customer": "customer_add",
-        "Delete Customer": "customer_delete",
-        "Edit Customer": "customer_edit"
-    },
+    const RIGHT_NAME_MAP = {
+        customer: {
+            "Add Customer": "customer_add",
+            "Delete Customer": "customer_delete",
+            "Edit Customer": "customer_edit"
+        },
 
-    product: {
-        "Add Product": "product_add",
-        "Edit Product": "product_edit",
-        "Delete Product": "product_delete",
-        "Add Price": "product_price_add",
-        "Edit Price": "product_price_edit",
-        "Delete Price": "product_price_delete"
-    },
+        product: {
+            "Add Product": "product_add",
+            "Edit Product": "product_edit",
+            "Delete Product": "product_delete",
+            "Add Price": "product_price_add",
+            "Edit Price": "product_price_edit",
+            "Delete Price": "product_price_delete"
+        },
 
-    hr: {
-        "Add Job": "hr_job_add",
-        "Delete Employee": "hr_employee_delete",
-        "Add Department": "hr_department_add",
-        "Delete Job": "hr_job_delete",
-        "Add Job History": "hr_jobhist_add",
-        "Delete Department": "hr_department_delete",
-        "Edit Department": "hr_department_edit",
-        "Delete Job History": "hr_jobhist_delete",
-        "Edit Employee": "hr_employee_edit",
-        "Add Employee": "hr_employee_add",
-        "Edit Job": "hr_job_edit",
-        "View Job History": "hr_jobhist_view"
-    },
+        hr: {
+            "Add Job": "hr_job_add",
+            "Delete Employee": "hr_employee_delete",
+            "Add Department": "hr_department_add",
+            "Delete Job": "hr_job_delete",
+            "Add Job History": "hr_jobhist_add",
+            "Delete Department": "hr_department_delete",
+            "Edit Department": "hr_department_edit",
+            "Delete Job History": "hr_jobhist_delete",
+            "Edit Employee": "hr_employee_edit",
+            "Add Employee": "hr_employee_add",
+            "Edit Job": "hr_job_edit",
+            "View Job History": "hr_jobhist_view"
+        },
 
-    sales: {
-        "Add Sale": "sales_add",
-        "Delete Sale": "sales_delete",
-        "Add Sale Detail": "sales_detail_add",
-        "Delete Sale Detail": "sales_detail_delete",
-        "Edit Sale": "sales_edit",
-        "View Sale Detail": "sales_detail_view",
-        "Edit Sale Detail": "sales_detail_edit"
-    },
+        sales: {
+            "Add Sale": "sales_add",
+            "Delete Sale": "sales_delete",
+            "Add Sale Detail": "sales_detail_add",
+            "Delete Sale Detail": "sales_detail_delete",
+            "Edit Sale": "sales_edit",
+            "View Sale Detail": "sales_detail_view",
+            "Edit Sale Detail": "sales_detail_edit"
+        },
 
-    reports: {
-        "Top Customers": "reports_top_customers",
-        "Top Products": "reports_top_products",
-        "All Employees": "reports_all_employees",
-        "Top Sales": "reports_top_sales",
-        "Product Master List": "reports_product_master_list",
-        "Active Employees": "reports_active_employees",
-        "Employee Job History": "reports_employee_jobhist"
-    }
-};
+        reports: {
+            "Top Customers": "reports_top_customers",
+            "Top Products": "reports_top_products",
+            "All Employees": "reports_all_employees",
+            "Top Sales": "reports_top_sales",
+            "Product Master List": "reports_product_master_list",
+            "Active Employees": "reports_active_employees",
+            "Employee Job History": "reports_employee_jobhist"
+        }
+    };
  
     function showMessage(text, isError) {
         message.textContent = text;
@@ -1057,21 +1056,15 @@ const RIGHT_NAME_MAP = {
     });
  
  function getRights() {
-
     const permissions = [];
 
     SECTIONS.forEach(sec => {
-
         const moduleId = MODULE_IDS[sec.id];
-
         const checkedBoxes = grid.querySelectorAll(
             `input[data-section="${sec.id}"]:checked`
         );
-
         checkedBoxes.forEach(cb => {
-
             const rightName = RIGHT_NAME_MAP[sec.id][cb.nextElementSibling.textContent.trim()];
-
             const rightId = rightIdByName.get(rightName);
 
             if (rightId !== undefined) {
@@ -1080,15 +1073,11 @@ const RIGHT_NAME_MAP = {
                     right_id: rightId
                 });
             }
-
         });
-
     });
 
     return permissions;
-}
- 
-   
+} 
 function setRights(permissions) {
     const selectedRights = new Set(
         (permissions || []).map(permission => {
@@ -1105,14 +1094,9 @@ function setRights(permissions) {
         cb.checked = selectedRights.has(cb.value);
     });
 }
-
- 
-   async function openRightsModal(userId, userName) {
-
+async function openRightsModal(userId, userName) {
     currentUserId = userId;
-
     showMessage("", false);
-
     setRights([]);
 
     modal.querySelector(".modal-subtitle").textContent = userName
@@ -1120,114 +1104,81 @@ function setRights(permissions) {
         : "To edit rights of a user's account, fill out the following.";
 
     modal.classList.remove("hidden");
-
     saveBtn.disabled = true;
-    
-
     try {
-
-        // STEP 1: Load the catalogue only once.
-if (!rightsCatalogueLoaded) {
-    const catalogueResponse = await fetch(API + "/rights-catalogue", {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + sessionStorage.getItem("access_token")
+        if (!rightsCatalogueLoaded) {
+        const catalogueResponse = await fetch(API + "/rights-catalogue", {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + sessionStorage.getItem("access_token")
         }
     });
-
     const catalogueData = await catalogueResponse.json();
-
     if (!catalogueResponse.ok) {
         throw new Error(
             catalogueData.error || "Unable to load rights catalogue."
         );
     }
-
-    rightsCatalogue = catalogueData.rights || [];
-
-    rightIdByName = new Map(
-        rightsCatalogue.map(right => [
-            right.right_name,
-            Number(right.right_id)
+        rightsCatalogue = catalogueData.rights || [];
+        rightIdByName = new Map(
+            rightsCatalogue.map(right => [
+                right.right_name,
+                Number(right.right_id)
         ])
     );
-
-    rightsCatalogueLoaded = true;
-}
-
-        // Check that every checkbox has a matching catalogue entry.
-        const expectedRights = SECTIONS.flatMap(sec =>
-    sec.items.map(name => RIGHT_NAME_MAP[sec.id][name])
-);
-
-
+        rightsCatalogueLoaded = true;
+    }
+    const expectedRights = SECTIONS.flatMap(sec =>
+        sec.items.map(name => RIGHT_NAME_MAP[sec.id][name])
+    );
         const missingRights = expectedRights.filter(
             name => !rightIdByName.has(name)
         );
-
         if (missingRights.length > 0) {
             throw new Error(
                 "Missing rights in rights_catalogue: " +
                 missingRights.join(", ")
             );
         }
-
-        // STEP 2: Load the selected user's existing permissions.
+        
         const response = await fetch(
-    API + "/admin/users/" + encodeURIComponent(userId) + "/rights",
-    {
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + sessionStorage.getItem("access_token")
+        API + "/admin/users/" + encodeURIComponent(userId) + "/rights",{
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + sessionStorage.getItem("access_token")
         }
     }
 );
-
-
         const data = await response.json();
-
         if (!response.ok) {
             throw new Error(
                 data.error || "Unable to load current rights."
             );
         }
-
-        // STEP 3: Check the user's existing permissions.
         if (currentUserId === userId) {
             setRights(data.permissions);
         }
-
     } catch (error) {
-
         console.error("Load rights error:", error);
-
         showMessage(
             error.message || "Unable to load rights.",
             true
         );
-
     } finally {
-
         saveBtn.disabled = false;
-
     }
 }
-
-
-window.openRightsModal = openRightsModal;
+    window.openRightsModal = openRightsModal;
  
     function closeRightsModal() {
         modal.classList.add("hidden");
         currentUserId = null;
     }
- 
     document.getElementById("closeRightsBtn").addEventListener("click", closeRightsModal);
     modal.addEventListener("click", e => { if (e.target === modal) closeRightsModal(); });
     document.addEventListener("keydown", e => {
         if (e.key === "Escape" && !modal.classList.contains("hidden")) closeRightsModal();
     });
- 
-    
     saveBtn.addEventListener("click", async () => {
         if (!currentUserId) return;
         saveBtn.disabled = true;
@@ -1239,7 +1190,6 @@ window.openRightsModal = openRightsModal;
     "Content-Type": "application/json",
     Authorization: "Bearer " + sessionStorage.getItem("access_token")
 },
-
                 body: JSON.stringify({ permissions: getRights() })
             });
             let data = {};
@@ -1257,11 +1207,8 @@ window.openRightsModal = openRightsModal;
             saveBtn.disabled = false;
         }
     });
- 
     window.openRightsModal = openRightsModal;
 })();
-
-
     (async function restoreSession() {
         if (!sessionStorage.getItem("access_token")) return;
         try {

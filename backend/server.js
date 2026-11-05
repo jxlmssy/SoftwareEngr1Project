@@ -393,41 +393,30 @@ app.put("/api/admin/users/:id", requireAuth, requirePasswordSet, requireAdmin, r
     res.json({ message: "User account updated." });
 });
 
-// GET USER RIGHTS
-
 app.get("/api/admin/users/:id/rights", requireAuth, requirePasswordSet, requireAdmin, async (req, res) => {
     try {
         const userId = req.params.id;
 
-        // Retrieve the user's saved permissions.
         const { data: authData, error: authError } =
             await admin.auth.admin.getUserById(userId);
-
         if (authError || !authData.user) {
             return res.status(404).json({
                 error: "User not found."
             });
         }
-
         const savedPermissions =
             authData.user.app_metadata?.permissions || [];
-
         res.json({
             permissions: savedPermissions
         });
-
     } catch (error) {
         console.error("Load rights error:", error);
-
         res.status(500).json({
             error: "Unable to load rights."
         });
     }
 });
 
-
-
-// SAVE USER RIGHTS
 app.put("/api/admin/users/:id/rights", requireAuth, requirePasswordSet, requireAdmin, async (req, res) => {
     try {
         const userId = req.params.id;
@@ -438,37 +427,28 @@ app.put("/api/admin/users/:id/rights", requireAuth, requirePasswordSet, requireA
                 error: "Permissions must be an array."
             });
         }
-
-        // Confirm the selected user exists.
         const { data: user, error: userError } = await admin
             .from("app_users")
             .select("id, role")
             .eq("id", userId)
             .maybeSingle();
-
         if (userError) throw userError;
-
         if (!user) {
             return res.status(404).json({
                 error: "User not found."
             });
         }
-
-        // Load active rights from the catalogue.
         const { data: catalogue, error: catalogueError } = await admin
             .from("rights_catalogue")
             .select("right_id, right_name")
             .eq("is_deleted", false);
-
         if (catalogueError) throw catalogueError;
-
         const validRights = new Map(
             (catalogue || []).map(right => [
                 Number(right.right_id),
                 right.right_name
             ])
         );
-
         const modulePrefixes = {
             1: "customer_",
             2: "product_",
@@ -476,7 +456,6 @@ app.put("/api/admin/users/:id/rights", requireAuth, requirePasswordSet, requireA
             4: "sales_",
             5: "reports_"
         };
-
         const savedPermissions = [];
         const seen = new Set();
 
@@ -490,32 +469,26 @@ app.put("/api/admin/users/:id/rights", requireAuth, requirePasswordSet, requireA
                     error: "Invalid module selected."
                 });
             }
-
             if (!rightName || !rightName.startsWith(modulePrefixes[moduleId])) {
                 return res.status(400).json({
                     error: "Invalid right selected for this module."
                 });
             }
-
             const key = `${moduleId}-${rightId}`;
 
             if (seen.has(key)) continue;
             seen.add(key);
-
             savedPermissions.push({
                 module_id: moduleId,
                 right_id: rightId
             });
         }
-
-        // Preserve existing app_metadata and replace only permissions.
         const { data: authData, error: authError } =
             await admin.auth.admin.getUserById(userId);
 
         if (authError) throw authError;
 
         const existingMetadata = authData.user.app_metadata || {};
-
         const { error: updateError } =
             await admin.auth.admin.updateUserById(userId, {
                 app_metadata: {
@@ -539,7 +512,6 @@ app.put("/api/admin/users/:id/rights", requireAuth, requirePasswordSet, requireA
         });
     }
 });
-
 
 app.post("/api/admin/users/:id/approve", requireAuth, requirePasswordSet, requireAdmin, requireManageableUser, requirePendingUser, async (req, res) => {
     const { error } = await admin
