@@ -51,10 +51,10 @@ To automate basic smoke tests that verify whether users can successfully log in 
 
 | Test ID | Test Scenario | Status | Actual Result |
 |---|---|---|---|
-| TC-01 | Login with valid credentials | Not Run | Pending execution |
-| TC-02 | Login with invalid credentials | Not Run | Pending execution |
-| TC-03 | Main page loads successfully | Not Run | Pending execution |
-| TC-04 | Protected main page requires authentication | Not Run | Pending execution |
+| TC-01 | Login with valid credentials | Not Run | N/A |
+| TC-02 | Login with invalid credentials | Not Run | N/A |
+| TC-03 | Main page loads successfully | Not Run | N/A |
+| TC-04 | Protected main page requires authentication | Not Run | N/A |
 
 ## 5. Bug Log
 
