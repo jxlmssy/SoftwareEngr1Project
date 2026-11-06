@@ -1,4 +1,4 @@
-# Bug Reports and Fix Verification — S1-TST-06
+# Bug Reports and Fix Verification 
 
 ## 1. Objective
 
