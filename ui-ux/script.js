@@ -205,6 +205,7 @@ document.addEventListener("DOMContentLoaded", function () {
         currentUserRole = ["admin", "superadmin"].includes(String(role || "").toLowerCase())
             ? String(role).toLowerCase()
             : "user";
+            resetDashboardState();
         document.getElementById("dashUserName").textContent = userName;
         const roleBadge = document.getElementById("dashUserRole");
         roleBadge.textContent = currentUserRole === "superadmin"
@@ -214,7 +215,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const canManageUsers = ["admin", "superadmin"].includes(currentUserRole);
         userManagementNav.classList.toggle("hidden", !canManageUsers);
         administrationLabel.classList.toggle("hidden", !canManageUsers);
-        if (!canManageUsers && userManagementView) showDashboardPage("dashboard");
         document.getElementById("bannerUserName").textContent = userName.split(" ")[0];
         closeModal();
         landingView.classList.add("hidden");
@@ -304,8 +304,13 @@ document.addEventListener("DOMContentLoaded", function () {
             row.append(createUserCell(user.email, "user-email-cell"));
 
             const roleCell = document.createElement("td");
+            const roleClasses = {
+            superadmin: "superadmin-role",
+            admin: "admin-role"
+            };
+
             const roleBadge = document.createElement("span");
-            roleBadge.className = "role-badge " + (role === "admin" || role === "superadmin" ? "admin-role" : "user-role");
+            roleBadge.className = "role-badge " + (roleClasses[role] || "user-role");
             roleBadge.textContent = role === "superadmin" ? "Superadmin" : role.charAt(0).toUpperCase() + role.slice(1);
             roleCell.append(roleBadge);
             row.append(roleCell);
@@ -330,7 +335,10 @@ document.addEventListener("DOMContentLoaded", function () {
             } else if (canManageTarget && status.label === "Active" && user.id !== sessionStorage.getItem("user_id")) {
                 actions.append(createUserAction("Block", "block", user.id, "danger"));
             }
-            if (canManageTarget && status.label !== "Deleted") actions.append(createUserAction("Edit ✎", "edit", user.id, "edit"));
+            if (canManageTarget && status.label !== "Deleted"){
+                actions.append(createUserAction("Rights", "rights", user.id)); 
+                actions.append(createUserAction("Edit ✎", "edit", user.id, "edit"));
+        }
             actionsCell.append(actions);
             row.append(actionsCell);
             usersTableBody.append(row);
@@ -491,6 +499,16 @@ document.addEventListener("DOMContentLoaded", function () {
         window.scrollTo(0, 0);
     }
 
+    function resetDashboardState() {
+    usersLoaded = false;
+    usersById = new Map();
+    usersTableBody.replaceChildren();
+    showUserManagementFeedback("", false);
+    closeAddUserModal();
+    closeEditUserModal();
+    showDashboardPage("dashboard");   // always start on the dashboard home
+    }
+
     function setFieldError(inputId, errorId, msg) {
         document.getElementById(inputId).classList.add("invalid");
         document.getElementById(inputId).classList.remove("valid");
@@ -543,18 +561,28 @@ document.addEventListener("DOMContentLoaded", function () {
         await post("/logout", {}, token).catch(() => {});
         clearSession();
         currentUserRole = "user";
-        usersLoaded = false;
+        resetDashboardState();
         navigateToLanding();
     });
 
     userManagementNav.addEventListener("click", () => showDashboardPage("users"));
     document.querySelector("[data-dashboard-page='dashboard']").addEventListener("click", () => showDashboardPage("dashboard"));
     usersTableBody.addEventListener("click", event => {
-        const button = event.target.closest("[data-user-action]");
-        if (!button) return;
-        if (button.dataset.userAction === "edit") openEditUserModal(button.dataset.userId);
-        else updateUserStatus(button.dataset.userAction, button.dataset.userId);
-    });
+    const button = event.target.closest("[data-user-action]");
+    if (!button) return;
+    const action = button.dataset.userAction;
+    const userId = button.dataset.userId;
+
+    if (action === "edit") {
+        openEditUserModal(userId);
+    } else if (action === "rights") {
+        const u = usersById.get(userId) || {};
+        const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.email || "";
+        window.openRightsModal(userId, name);
+    } else {
+        updateUserStatus(action, userId);
+    }
+});
 
     document.getElementById("addUserBtn").addEventListener("click", () => {
         document.getElementById("addUserForm").reset();
@@ -900,7 +928,287 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     });
+    
 
+(function () {
+    const API = "/api";
+    const SECTIONS = [
+        { id: "customer", title: "Customer Management", cols: 1, items: [
+            "Add Customer", "Delete Customer", "Edit Customer"
+        ]},
+        { id: "product", title: "Product Management", cols: 2, items: [
+            "Add Product", "Edit Product", "Delete Product", "Add Price", "Edit Price", "Delete Price"
+        ]},
+        { id: "hr", title: "Human Resources", cols: 3, full: true, items: [
+            "Add Job", "Delete Employee", "Add Department",
+            "Delete Job", "Add Job History", "Delete Department",
+            "Edit Department", "Delete Job History", "Edit Employee",
+            "Add Employee", "Edit Job", "View Job History"
+        ]},
+        { id: "sales", title: "Sales", cols: 1, items: [
+            "Add Sale", "Delete Sale", "Add Sale Detail", "Delete Sale Detail",
+            "Edit Sale", "View Sale Detail", "Edit Sale Detail"
+        ]},
+        { id: "reports", title: "Reports", cols: 1, items: [
+            "Top Customers", "Top Products", "All Employees", "Top Sales",
+            "Product Master List", "Active Employees", "Employee Job History"
+        ]}
+    ];
+ 
+    const modal = document.getElementById("rightsModal");
+    const grid = document.getElementById("rightsGrid");
+    const message = document.getElementById("rightsMessage");
+    const saveBtn = document.getElementById("saveRightsBtn");
+    let currentUserId = null;
+
+    const MODULE_IDS = {
+    customer: 1,
+    product: 2,
+    hr: 3,
+    sales: 4,
+    reports: 5
+};
+
+    let rightsCatalogue = [];
+    let rightIdByName = new Map();
+    let rightsCatalogueLoaded = false;
+
+    const RIGHT_NAME_MAP = {
+        customer: {
+            "Add Customer": "customer_add",
+            "Delete Customer": "customer_delete",
+            "Edit Customer": "customer_edit"
+        },
+
+        product: {
+            "Add Product": "product_add",
+            "Edit Product": "product_edit",
+            "Delete Product": "product_delete",
+            "Add Price": "product_price_add",
+            "Edit Price": "product_price_edit",
+            "Delete Price": "product_price_delete"
+        },
+
+        hr: {
+            "Add Job": "hr_job_add",
+            "Delete Employee": "hr_employee_delete",
+            "Add Department": "hr_department_add",
+            "Delete Job": "hr_job_delete",
+            "Add Job History": "hr_jobhist_add",
+            "Delete Department": "hr_department_delete",
+            "Edit Department": "hr_department_edit",
+            "Delete Job History": "hr_jobhist_delete",
+            "Edit Employee": "hr_employee_edit",
+            "Add Employee": "hr_employee_add",
+            "Edit Job": "hr_job_edit",
+            "View Job History": "hr_jobhist_view"
+        },
+
+        sales: {
+            "Add Sale": "sales_add",
+            "Delete Sale": "sales_delete",
+            "Add Sale Detail": "sales_detail_add",
+            "Delete Sale Detail": "sales_detail_delete",
+            "Edit Sale": "sales_edit",
+            "View Sale Detail": "sales_detail_view",
+            "Edit Sale Detail": "sales_detail_edit"
+        },
+
+        reports: {
+            "Top Customers": "reports_top_customers",
+            "Top Products": "reports_top_products",
+            "All Employees": "reports_all_employees",
+            "Top Sales": "reports_top_sales",
+            "Product Master List": "reports_product_master_list",
+            "Active Employees": "reports_active_employees",
+            "Employee Job History": "reports_employee_jobhist"
+        }
+    };
+ 
+    function showMessage(text, isError) {
+        message.textContent = text;
+        message.className = "form-message" + (text ? (isError ? " error" : " success") : "");
+    }
+ 
+    grid.innerHTML = SECTIONS.map(sec => `
+        <section class="rights-section ${sec.full ? "full" : ""}" data-section="${sec.id}">
+            <div class="rights-toggles">
+                <button type="button" data-action="all">All</button>
+                <button type="button" data-action="none">None</button>
+            </div>
+            <h3>${sec.title}</h3>
+            <div class="rights-options cols-${sec.cols}">
+                ${sec.items.map(name => `
+                    <label>
+                        <input type="checkbox" data-section="${sec.id}" value="${RIGHT_NAME_MAP[sec.id][name]}">
+                        <span>${name}</span>
+                    </label>`).join("")}
+            </div>
+        </section>`).join("");
+ 
+    grid.addEventListener("click", e => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn) return;
+        const on = btn.dataset.action === "all";
+        btn.closest(".rights-section")
+            .querySelectorAll("input[type=checkbox]")
+            .forEach(cb => (cb.checked = on));
+    });
+ 
+ function getRights() {
+    const permissions = [];
+
+    SECTIONS.forEach(sec => {
+        const moduleId = MODULE_IDS[sec.id];
+        const checkedBoxes = grid.querySelectorAll(
+            `input[data-section="${sec.id}"]:checked`
+        );
+        checkedBoxes.forEach(cb => {
+            const rightName = RIGHT_NAME_MAP[sec.id][cb.nextElementSibling.textContent.trim()];
+            const rightId = rightIdByName.get(rightName);
+
+            if (rightId !== undefined) {
+                permissions.push({
+                    module_id: moduleId,
+                    right_id: rightId
+                });
+            }
+        });
+    });
+
+    return permissions;
+} 
+function setRights(permissions) {
+    const selectedRights = new Set(
+        (permissions || []).map(permission => {
+            for (const [rightName, rightId] of rightIdByName) {
+                if (rightId === Number(permission.right_id)) {
+                    return rightName;
+                }
+            }
+            return null;
+        }).filter(Boolean)
+    );
+
+    grid.querySelectorAll("input[type=checkbox]").forEach(cb => {
+        cb.checked = selectedRights.has(cb.value);
+    });
+}
+async function openRightsModal(userId, userName) {
+    currentUserId = userId;
+    showMessage("", false);
+    setRights([]);
+
+    modal.querySelector(".modal-subtitle").textContent = userName
+        ? `To edit rights of ${userName}'s account, fill out the following.`
+        : "To edit rights of a user's account, fill out the following.";
+
+    modal.classList.remove("hidden");
+    saveBtn.disabled = true;
+    try {
+        if (!rightsCatalogueLoaded) {
+        const catalogueResponse = await fetch(API + "/rights-catalogue", {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + sessionStorage.getItem("access_token")
+        }
+    });
+    const catalogueData = await catalogueResponse.json();
+    if (!catalogueResponse.ok) {
+        throw new Error(
+            catalogueData.error || "Unable to load rights catalogue."
+        );
+    }
+        rightsCatalogue = catalogueData.rights || [];
+        rightIdByName = new Map(
+            rightsCatalogue.map(right => [
+                right.right_name,
+                Number(right.right_id)
+        ])
+    );
+        rightsCatalogueLoaded = true;
+    }
+    const expectedRights = SECTIONS.flatMap(sec =>
+        sec.items.map(name => RIGHT_NAME_MAP[sec.id][name])
+    );
+        const missingRights = expectedRights.filter(
+            name => !rightIdByName.has(name)
+        );
+        if (missingRights.length > 0) {
+            throw new Error(
+                "Missing rights in rights_catalogue: " +
+                missingRights.join(", ")
+            );
+        }
+        
+        const response = await fetch(
+        API + "/admin/users/" + encodeURIComponent(userId) + "/rights",{
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + sessionStorage.getItem("access_token")
+        }
+    }
+);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(
+                data.error || "Unable to load current rights."
+            );
+        }
+        if (currentUserId === userId) {
+            setRights(data.permissions);
+        }
+    } catch (error) {
+        console.error("Load rights error:", error);
+        showMessage(
+            error.message || "Unable to load rights.",
+            true
+        );
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
+    window.openRightsModal = openRightsModal;
+ 
+    function closeRightsModal() {
+        modal.classList.add("hidden");
+        currentUserId = null;
+    }
+    document.getElementById("closeRightsBtn").addEventListener("click", closeRightsModal);
+    modal.addEventListener("click", e => { if (e.target === modal) closeRightsModal(); });
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && !modal.classList.contains("hidden")) closeRightsModal();
+    });
+    saveBtn.addEventListener("click", async () => {
+        if (!currentUserId) return;
+        saveBtn.disabled = true;
+        showMessage("", false);
+        try {
+            const res = await fetch(API + "/admin/users/" + encodeURIComponent(currentUserId) + "/rights", {
+                method: "PUT",
+                headers: {
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + sessionStorage.getItem("access_token")
+},
+                body: JSON.stringify({ permissions: getRights() })
+            });
+            let data = {};
+            try { data = await res.json(); } catch (_) {}
+            if (!res.ok) {
+                showMessage(data.error || "Unable to save rights.", true);
+                return;
+            }
+            showMessage(data.message || "Rights saved.", false);
+            setTimeout(closeRightsModal, 700);
+        } catch (err) {
+            console.error("Save rights error:", err);
+            showMessage("Unable to connect to the server.", true);
+        } finally {
+            saveBtn.disabled = false;
+        }
+    });
+    window.openRightsModal = openRightsModal;
+})();
     (async function restoreSession() {
         if (!sessionStorage.getItem("access_token")) return;
         try {
