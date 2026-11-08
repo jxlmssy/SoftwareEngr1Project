@@ -177,11 +177,11 @@ To verify that the registration, login, logout, set password, and reset password
 
 | Test ID | Test Scenario | Status | Actual Result |
 |---|---|---|---|
-| TC-01 | Register with valid details | Not Run | N/A |
-| TC-02 | Register with invalid or missing information | Not Run | N/A |
-| TC-03 | Login with valid credentials | Not Run | N/A |
-| TC-04 | Login with an incorrect password | Not Run | N/A |
-| TC-05 | Logout successfully | Not Run | N/A |
+| TC-01 | Register with valid details | Passed | The Account was successfully created. |
+| TC-02 | Register with invalid or missing information | Passed | The System prevented submission. |
+| TC-03 | Login with valid credentials | Passed | The User successfully logged in |
+| TC-04 | Login with an incorrect password | Passed | The System rejected the incorrect password |
+| TC-05 | Logout successfully | Passed | The user successfully logged out, and the session ended. |
 | TC-06 | Set password with a valid token | Not Run | N/A |
 | TC-07 | Set password with an expired token | Not Run | N/A |
 | TC-08 | Set password using a reused token | Not Run | N/A |
