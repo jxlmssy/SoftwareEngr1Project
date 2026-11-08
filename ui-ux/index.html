@@ -168,55 +168,21 @@
                     <span>Dashboard</span>
                     <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </button>
-                <button type="button" class="sidebar-item hidden" data-module-access="1"data-dashboard-page="customers">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                    <span>Customers</span>
-                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-                <button type="button" class="sidebar-item hidden" data-module-access="2" data-dashboard-page="products">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
-                    <span>Products</span>
-                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-                <button type="button" class="sidebar-item hidden" data-module-access="3"data-dashboard-page="hr">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
-                    <span>Human Resources</span>
-                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-                <button type="button" class="sidebar-item hidden" data-module-access="4" data-dashboard-page="sales">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-                    <span>Sales</span>
-                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-                <button type="button" class="sidebar-item hidden" data-module-access="5" data-dashboard-page="reports">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
-                    <span>Reports</span>
-                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
                 <div class="sidebar-section-label hidden" id="administrationLabel">Administration</div>
                 <button type="button" class="sidebar-item hidden" id="userManagementNav" data-dashboard-page="users">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></svg>
                     <span>User Management</span>
                     <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </button>
-
             </aside>
 
             <main class="dash-content">
-                <section id="dashboardHome" data-page-view="dashboard">
+                <section id="dashboardHome">
                 <div class="welcome-banner">
                     <span>Welcome back, <strong id="bannerUserName">Google</strong>! ✏️</span>
                 </div>
 
                 <div class="dash-cards-grid">
-                    <div class="dash-card card-interactive" data-module-access="3">
-                        <div class="dash-card-header"><span class="dash-card-label">Human Resources</span></div>
-                        <div class="trend-sub">Employees, jobs and departments</div>
-                    </div>
-                    <div class="dash-card card-interactive" data-module-access="5">
-                        <div class="dash-card-header"><span class="dash-card-label">Reports</span></div>
-                        <div class="trend-sub">Top customers, products and sales</div>
-                    </div>
                     <div class="dash-card card-interactive">
                         <div class="dash-card-header">
                             <span class="dash-card-label">Total Customers:</span>
@@ -263,7 +229,7 @@
                     </div>
                 </div>
                 </section>
-                <section id="userManagementView" class="hidden" data-page-view="users">
+                <section id="userManagementView" class="hidden">
                     <div class="management-heading">
                         <div>
                             <h1>User Management</h1>
@@ -281,81 +247,9 @@
                         </table>
                     </div>
                 </section>
-                 <section id="customersView" class="hidden" data-page-view="customers">
-    <div class="management-heading">
-        <div>
-            <h1>Customers</h1>
-            <p>Client management, account tracking, and support history.</p>
-        </div>
-    </div>
-    <div class="users-table-wrap">
-        <table class="users-table">
-            <thead><tr><th>No</th><th>Name</th><th>Address</th><th>Terms</th><th>Status</th><th>Stamp</th><th>Actions</th></tr></thead>
-            <tbody id="customersTableBody"></tbody>
-        </table>
-    </div>
-</section>
-
-<section id="productsView" class="hidden" data-page-view="products">
-    <div class="management-heading">
-        <div>
-            <h1>Products</h1>
-            <p>Stock management, product listing, and fulfillment.</p>
-        </div>
-    </div>
-    <div class="users-table-wrap">
-        <table class="users-table">
-            <thead><tr><th>Code</th><th>Description</th><th>Unit</th><th>Price</th><th>Status</th><th>Stamp</th><th>Actions</th></tr></thead>
-            <tbody id="productsTableBody"></tbody>
-        </table>
-    </div>
-</section>
-
-<section id="hrView" class="hidden" data-page-view="hr">
-    <div class="management-heading">
-        <div>
-            <h1>Human Resources</h1>
-            <p>Team operations, talent management, and payroll.</p>
-        </div>
-    </div>
-    <div class="users-table-wrap">
-        <table class="users-table">
-            <thead><tr><th>Emp No</th><th>Name</th><th>Gender</th><th>Birth Date</th><th>Hire Date</th><th>Separation Date</th><th>Status</th><th>Stamp</th><th>Action</th></tr></thead>
-            <tbody id="hrTableBody"></tbody>
-        </table>
-    </div>
-</section>
-
-<section id="salesView" class="hidden" data-page-view="sales">
-    <div class="management-heading">
-        <div>
-            <h1>Sales</h1>
-            <p>Transaction tracking, revenue performance, and pipeline.</p>
-        </div>
-    </div>
-    <div class="users-table-wrap">
-        <table class="users-table">
-            <thead><tr><th>Transaction No</th><th>Date</th><th>Customer</th><th>Salesperson</th><th>Status</th><th>Stamp</th><th>Actions</th></tr></thead>
-            <tbody id="salesTableBody"></tbody>
-        </table>
-    </div>
-</section>
-
-<section id="reportsView" class="hidden" data-page-view="reports">
-    <div class="management-heading">
-        <div>
-            <h1>Reports</h1>
-            <p>Analytics and exports.</p>
-        </div>
-    </div>
-    <div class="users-table-wrap">
-        <p class="users-table-state">Coming soon.</p>
-    </div>
-</section>
             </main>
         </div>
     </div>
-
 
     <div class="modal-overlay hidden" id="addUserModal">
         <div class="modal-card">
