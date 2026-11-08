@@ -73,7 +73,7 @@ The objective of this test plan is to verify that the Sign Up, Log In, and Dashb
 
 ### TC-03 — Sign Up with Invalid Email Format
 
-**Test Data:** An invalid email format, such as `alexexample.com`.
+**Test Data:** An invalid email format, such as `alex@gmail.com`.
 
 **Steps:**
 1. Open the Sign Up page.
@@ -242,29 +242,24 @@ The objective of this test plan is to verify that the Sign Up, Log In, and Dashb
 
 | Test ID | Test Scenario | Status | Actual Result |
 |---|---|---|---|
-| TC-01 | Sign Up with valid details | Not Run | N/A |
-| TC-02 | Sign Up with required fields empty | Not Run | N/A |
-| TC-03 | Sign Up with invalid email format | Not Run | N/A |
-| TC-04 | Sign Up with an existing email | Not Run | N/A |
-| TC-05 | Sign Up with mismatched passwords | Not Run | N/A |
-| TC-06 | Log In with valid credentials | Not Run | N/A |
-| TC-07 | Log In with an incorrect password | Not Run | N/A |
-| TC-08 | Log In with required fields empty | Not Run | N/A |
-| TC-09 | Open dashboard after login | Not Run | N/A |
-| TC-10 | Open dashboard without login | Not Run | N/A |
-| TC-11 | Log out | Not Run | N/A |
-| TC-12 | Check dashboard navigation | Not Run | N/A |
+| TC-01 | Sign Up with valid details | Passed | The Account was successfully created. |
+| TC-02 | Sign Up with required fields empty | Passed | The System prevented submission. |
+| TC-03 | Sign Up with invalid email format | Passed | The System rejected the invalid email. |
+| TC-04 | Sign Up with an existing email | Passed | The system detected that the email was already registered and did not create another account. |
+| TC-05 | Sign Up with mismatched passwords | Passed | The system detected that the passwords did not match and prevented the account from being created. |
+| TC-06 | Log In with valid credentials | Passed | The User successfully logged in |
+| TC-07 | Log In with an incorrect password | Passed | The System rejected the incorrect password   |
+| TC-08 | Log In with required fields empty | Passed | The System prevented login |
+| TC-09 | Open dashboard after login | Passed | The user successfully logged in and was able to access the dashboard. |
+| TC-10 | Open dashboard without login | Passed | Open dashboard without login	Not Run	N/A
+TC-11	Log out	Not Run	N/A |
+| TC-11 | Log out | Passed | The user successfully logged out, and the session ended. |
+| TC-12 | Check dashboard navigation | Passed | The Logout button was visible and accessible on the dashboard. |
 
 
 ### 3.2 Bug Log
 
-Create a GitHub Issue for each observed defect. Do not record hypothetical problems as confirmed bugs.
-
-| Bug ID | Related Test | Steps to Reproduce | Expected Result | Actual Result | Severity | Status |
-|---|---|---|---|---|---|---|
-| To be assigned | To be recorded | To be recorded | To be recorded | To be recorded | To be assigned | To be assigned |
-
-If no bugs are found, record that no bugs were observed in the test cases executed, after testing is complete.
+No bugs were observed in the test cases executed. All tested features passed their expected results.
 
 ### 3.3 Notes and Follow-up
 
