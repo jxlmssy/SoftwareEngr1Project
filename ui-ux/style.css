@@ -13,7 +13,7 @@ body { font-family: 'Inter Variable', 'Inter', sans-serif; background-color: #0b
 .dash-navbar { height: 64px; padding: 0 24px; }
 .nav-container { max-width: 1360px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
 
-/* Navbar Logo Brand */
+
 .brand-container { display: flex; align-items: center; gap: 12px; }
 .brand-logo { width: 34px; height: 34px; background-color: #1e293b; border: 1px solid #334155; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; }
 .brand-title { font-size: 18px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
@@ -192,8 +192,22 @@ body { font-family: 'Inter Variable', 'Inter', sans-serif; background-color: #0b
 .resend-code { display: flex; flex-wrap: wrap; gap: 5px; font-size: 11px; margin-top: 8px; color: #777b8d; }
 .resend-message { font-size: 11px; color: #23834d; margin-top: 6px; }
 
-/* APPEND to the end of style.css (before the @media blocks if you want it to be overridable) */
 
+.rights-module-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font: inherit; color: inherit; }
+.rights-module-toggle span { font: inherit; color: inherit; }   
+
+.rights-module-toggle input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 17px; height: 17px; margin: 0; flex: none;
+    border: 1.5px solid #9a9a9f; border-radius: 4px; background: #fff;
+    display: grid; place-content: center; cursor: pointer;
+}
+.rights-module-toggle input[type="checkbox"]:checked { background: #171da2; border-color: #171da2; }
+.rights-module-toggle input[type="checkbox"]:checked::after {
+    content: ""; width: 4px; height: 8px;
+    border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+}
 .rights-card { max-width: 592px; padding: 32px 28px 24px; }
 .rights-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
 
