@@ -251,8 +251,7 @@ The objective of this test plan is to verify that the Sign Up, Log In, and Dashb
 | TC-07 | Log In with an incorrect password | Passed | The System rejected the incorrect password   |
 | TC-08 | Log In with required fields empty | Passed | The System prevented login |
 | TC-09 | Open dashboard after login | Passed | The user successfully logged in and was able to access the dashboard. |
-| TC-10 | Open dashboard without login | Passed | Open dashboard without login	Not Run	N/A
-TC-11	Log out	Not Run	N/A |
+| TC-10 | Open dashboard without login | Passed | The system prevented access to the dashboard without logging in. |
 | TC-11 | Log out | Passed | The user successfully logged out, and the session ended. |
 | TC-12 | Check dashboard navigation | Passed | The Logout button was visible and accessible on the dashboard. |
 
