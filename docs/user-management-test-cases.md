@@ -107,15 +107,15 @@ To verify the User Management functions, including adding, editing, blocking/unb
 
 | Test ID | Test Scenario | Status | Actual Result |
 |---|---|---|---|
-| TC-01 | Add a user | Not Run | N/A |
-| TC-02 | Add a user with invalid details | Not Run | N/A |
-| TC-03 | Edit user details | Not Run | N/A |
-| TC-04 | Block a user | Not Run | N/A |
-| TC-05 | Unblock a user | Not Run | N/A |
-| TC-06 | Approve a pending user | Not Run | N/A |
-| TC-07 | Designate a user as Admin | Not Run | N/A |
-| TC-08 | Admin cannot view Superadmin accounts | Not Run | N/A |
-| TC-09 | Admin cannot edit Superadmin accounts | Not Run | N/A |
+| TC-01 | Add a user | Passed | The user was successfully added to the system. |
+| TC-02 | Add a user with invalid details | Passed | The system rejected the invalid details and prevented the user from being added. |
+| TC-03 | Edit user details | Passed | The user details were successfully updated. |
+| TC-04 | Block a user | Passedn | The selected user was successfully blocked. |
+| TC-05 | Unblock a user | Passed | The selected user was successfully unblocked. |
+| TC-06 | Approve a pending user | Passed | The pending user was successfully approved. |
+| TC-07 | Designate a user as Admin | Passed | The selected user was successfully assigned the Admin role. |
+| TC-08 | Admin cannot view Superadmin accounts | Passed | The Admin could not view Superadmin accounts in User Management. |
+| TC-09 | Admin cannot edit Superadmin accounts | Passed | The Admin could not edit Superadmin accounts. |
 | TC-10 | Prevent removal or demotion of the last Superadmin | Not Run | N/A |
 | TC-11 | Remove or demote a Superadmin when another exists | Not Run | N/A |
 
