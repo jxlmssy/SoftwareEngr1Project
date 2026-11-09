@@ -115,7 +115,7 @@ Complete this matrix using the application's actual permission list and approved
 | TC-02 | Verify Admin permissions | Passed | The Admin accessed User Management and performed only the actions allowed for the Admin role. |
 | TC-03 | Verify User permissions | Passed | The User accessed only the features allowed for the User role |
 | TC-04 | Verify unauthorized menus are hidden | Passed | Restricted buttons and actions were unavailable to unauthorized roles. |
-| TC-05 | Verify unauthorized buttons and actions | Not Run | N/A |
+| TC-05 | Verify unauthorized buttons and actions | Passed | Restricted buttons and actions were unavailable to unauthorized roles. |
 | TC-06 | Verify server-side permission enforcement | Not Run | N/A |
 | TC-07 | Verify permitted server-side actions | Not Run | N/A |
 | TC-08 | Verify permissions for all roles across each right | Not Run | N/A |
