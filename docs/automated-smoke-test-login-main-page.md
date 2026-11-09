@@ -51,21 +51,22 @@ To automate basic smoke tests that verify whether users can successfully log in 
 
 | Test ID | Test Scenario | Status | Actual Result |
 |---|---|---|---|
-| TC-01 | Login with valid credentials | Not Run | N/A |
-| TC-02 | Login with invalid credentials | Not Run | N/A |
-| TC-03 | Main page loads successfully | Not Run | N/A |
-| TC-04 | Protected main page requires authentication | Not Run | N/A |
+| TC-01 | Login with valid credentials | Passed | The user successfully logged in using valid credentials. |
+| TC-02 | Login with invalid credentials | Passed | The system rejected the invalid credentials and prevented login. |
+| TC-03 | Main page loads successfully | Passed | The main page loaded successfully without errors. |
+| TC-04 | Protected main page requires authentication | Passed | he system redirected the unauthenticated user to the login page and prevented access to the protected main page. |
 
 ## 5. Bug Log
 
 | Bug ID / Issue Link | Related Test ID | Steps to Reproduce | Expected Result | Actual Result | Severity | Status |
-|---|---|---|---|---|---|---|
-| None recorded yet | — | — | — | — | — | — |
+| ------------------- | --------------- | ------------------ | --------------- | ------------- | -------- | ------ |
+| None recorded       | —               | —                  | —               | —             | —        | —      |
 
-## 6. Notes
+### 6. Notes
 
-- Record actual automated test results after execution.
-- Mark tests as Pass, Fail, or Blocked.
-- Create GitHub Issues for confirmed defects.
-- Include relevant test output or screenshots when available.
-- Do not include actual passwords or secret values in the document.
+- All four automated smoke test cases were executed.
+- All test results were recorded in the Test Execution Summary.
+- No bugs were observed during the test execution.
+- No GitHub Issues were created because no defects were identified.
+- Test output or screenshots may be attached as supporting evidence when available.
+- No actual passwords or secret credentials were included in the document.
