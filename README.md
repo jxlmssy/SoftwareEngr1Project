@@ -1,4 +1,4 @@
-# HOPE, Inc. ERP
+# TIRAMIS-U, Inc. ERP
 
 Group project for **Software Engineering 1**. A web-based ERP system with secure
 sign-in, user management, per-action rights, and a main page that shows each user only
