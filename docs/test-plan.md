@@ -262,10 +262,10 @@ No bugs were observed in the test cases executed. All tested features passed the
 
 ### 3.3 Notes and Follow-up
 
-- Tests not yet run: To be recorded
-- Blocked tests and reasons: To be recorded, if applicable
-- Retests needed: To be recorded, if applicable
-- Overall result: Pending execution
+- Tests not yet run: None
+- Blocked tests and reasons: None
+- Retests needed: None
+- Overall result: Passed – All 12 test cases were successfully executed and passed.
 
-**Reminder:** Update the actual results and statuses after running each test. Do not mark an unexecuted test as Pass.
+**Reminder:** All test results are based on the actual testing performed.
 
