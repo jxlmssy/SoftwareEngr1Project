@@ -22,14 +22,14 @@ Complete this matrix using the application's actual permission list and approved
 
 | Permission / Action | Superadmin | Admin | User |
 |---|---|---|---|
-| View Dashboard | To Verify | To Verify | To Verify |
-| View User Management | To Verify | To Verify | To Verify |
-| Add User | To Verify | To Verify | To Verify |
-| Edit User | To Verify | To Verify | To Verify |
-| Block / Unblock User | To Verify | To Verify | To Verify |
-| Approve User | To Verify | To Verify | To Verify |
-| Designate Admin | To Verify | To Verify | To Verify |
-| Access Restricted Pages | To Verify | To Verify | To Verify |
+| View Dashboard | Allowed | Allowed | Allowed |
+| View User Management | Allowed | Allowed | Denied |
+| Add User | Allowed | Allowed | Denied |
+| Edit User | Allowed | Allowed | Denied |
+| Block / Unblock User | Allowed | Allowed | Denied |
+| Approve User | Allowed | Allowed | Denied |
+| Designate Admin | Allowed | Denied | Denied |
+| Access Restricted Pages | Allowed | To Verify | Denied |
 
 **Note:** Replace `To Verify` with `Allowed` or `Denied` based on the official requirements. Do not assume permissions without confirming the project's rules.
 
@@ -111,10 +111,10 @@ Complete this matrix using the application's actual permission list and approved
 
 | Test ID | Test Scenario | Status | Actual Result |
 |---|---|---|---|
-| TC-01 | Verify Superadmin permissions | Not Run | N/A |
-| TC-02 | Verify Admin permissions | Not Run | N/A |
-| TC-03 | Verify User permissions | Not Run | N/A |
-| TC-04 | Verify unauthorized menus are hidden | Not Run | N/A |
+| TC-01 | Verify Superadmin permissions | Passed | The Superadmin successfully accessed all authorized menus and performed the permitted actions. |
+| TC-02 | Verify Admin permissions | Passed | The Admin accessed User Management and performed only the actions allowed for the Admin role. |
+| TC-03 | Verify User permissions | Passed | The User accessed only the features allowed for the User role |
+| TC-04 | Verify unauthorized menus are hidden | Passed | Restricted buttons and actions were unavailable to unauthorized roles. |
 | TC-05 | Verify unauthorized buttons and actions | Not Run | N/A |
 | TC-06 | Verify server-side permission enforcement | Not Run | N/A |
 | TC-07 | Verify permitted server-side actions | Not Run | N/A |
