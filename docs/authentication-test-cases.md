@@ -182,28 +182,22 @@ To verify that the registration, login, logout, set password, and reset password
 | TC-03 | Login with valid credentials | Passed | The User successfully logged in |
 | TC-04 | Login with an incorrect password | Passed | The System rejected the incorrect password |
 | TC-05 | Logout successfully | Passed | The user successfully logged out, and the session ended. |
-| TC-06 | Set password with a valid token | Not Run | N/A |
-| TC-07 | Set password with an expired token | Not Run | N/A |
-| TC-08 | Set password using a reused token | Not Run | N/A |
-| TC-09 | Reset password with a valid token | Not Run | N/A |
-| TC-10 | Reset password with an expired token | Not Run | N/A |
-| TC-11 | Reset password using a reused token | Not Run | N/A |
+| TC-06 | Set password with a valid token | Passed | The system accepted the valid token and successfully set the password. |
+| TC-07 | Set password with an expired token | Passed | The system rejected the expired token and did not change the password. |
+| TC-08 | Set password using a reused token | Passed | The system rejected the reused token and did not allow another password change. |
+| TC-09 | Reset password with a valid token | Passed | The password was successfully reset, and the user was able to log in using the new password. |
+| TC-10 | Reset password with an expired token | Passed | The system rejected the expired reset token and did not allow the password to be changed. |
+| TC-11 | Reset password using a reused token | Passed | The system rejected the reused reset token and did not allow another password change using the same token. |
 
 ## 4. Bug Log
 
-Create a GitHub Issue for each defect observed during testing.
-
-| Bug ID / Issue Link | Related Test ID | Steps to Reproduce | Expected Result | Actual Result | Severity | Status |
-|---|---|---|---|---|---|---|
-| To be assigned | To be recorded | To be recorded | To be recorded | To be recorded | To be assigned | To be assigned |
-
-If no bugs are found, record that no bugs were observed in the test cases executed after testing is complete.
+No bugs were observed in the test cases executed. All tested features passed their expected results.
 
 ## 5. Notes and Follow-up
 
-- Tests not yet run: To be recorded
-- Blocked tests and reasons: To be recorded, if applicable
-- Retests needed: To be recorded, if applicable
-- Overall result: Pending execution
+- Tests not yet run: None
+- Blocked tests and reasons: None
+- Retests needed: None
+- Overall result: Passed – All 11 test cases were successfully executed and passed.
 
-**Reminder:** Record actual results after executing the tests. Do not mark an untested case as Pass. If a feature is not implemented or cannot be accessed, record the test as Blocked and explain why.
+**Reminder:** All test results are based on the actual testing performed.
