@@ -1,8 +1,8 @@
 # Wireframes Customer Screen
-![alt text](<wireframe customers.png>)
+<img width="1965" height="914" alt="wireframe customers" src="https://github.com/user-attachments/assets/fd00a05e-6950-4821-83d8-534427dcc5b8" />
 
 # Description
-This document outlines the wireframe design and UI structure for task **[S2-UIX-01]**. It establishes the Customer Management screen layout, including the customer data table, status filters, search, and row-level actions for the Tiramis-u, Inc. ERP system.
+This document outlines the wireframe design and UI structure for task **[S2-UIX-01]**. It establishes the Customer Management screen layout, including the customer data table, status filters, search, and row-level actions for the Hope, Inc. ERP system.
 
 **File & Assets**
 - **UI Blueprint & Repository:** https://www.figma.com/design/O1EsT9in4dEaMgsvskkPuj/SOFT-ENGR-GRP?node-id=0-1&t=x2WqRU3IWrTBjh7A-1
@@ -10,7 +10,7 @@ This document outlines the wireframe design and UI structure for task **[S2-UIX-
 
 **Screen Components and User Flow**
 1. **Header & Navigation**
-- **Header & Top Bar:** Displays system branding (Tiramis-u, Inc. ERP), current screen title (Customer Management), logged-in user profile badge (Superadmin), and a logout action icon.
+- **Header & Top Bar:** Displays system branding (Hope, Inc. ERP), current screen title (Customer Management), logged-in user profile badge (Superadmin), and a logout action icon.
 - **Navigation Sidebar:** Persistent menu featuring links to Dashboard, Customers, Products, Human Resources, Sales, and Reports, plus an ADMINISTRATIONS section containing User Management. The Customers link corresponds to the active screen.
 
 2. **Customer Management List**
