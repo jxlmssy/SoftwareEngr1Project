@@ -6,6 +6,8 @@
 <img width="525" height="570" alt="Add Product" src="https://github.com/user-attachments/assets/dc8ce21c-976b-4910-9050-ced0abe5f9fd" />
 <img width="525" height="570" alt="Add Price" src="https://github.com/user-attachments/assets/8d927197-170b-4cb0-b430-be72e3255b3e" />
 <img width="1128" height="859" alt="Price Selection" src="https://github.com/user-attachments/assets/dddc12a1-aba3-45ff-b212-72279bb8cc30" />
+<img width="525" height="246" alt="Delete Confirmation" src="https://github.com/user-attachments/assets/2f549ecc-a530-4413-a500-6704463a6384" />
+<img width="525" height="246" alt="RestoreConfirmation" src="https://github.com/user-attachments/assets/8d321102-add7-40cd-8860-885d12a9ba53" />
 
 # Description
 This document outlines the wireframe design and UI structure for task **[S2-UIX-02]**. It establishes the Product Management screen layout and the Price History screens, including the product data table, status filters, search, row-level actions, and the Add Product, Edit Product, Price History, Add Price and Edit Price dialogs for the Hope, Inc. ERP system.
@@ -54,4 +56,4 @@ This document outlines the wireframe design and UI structure for task **[S2-UIX-
 - **Components:** `ProductTable`, `StatusFilterTabs`, `SearchInput`, `ProductFormDialog` (add and edit), `PriceHistoryDialog`, `PriceFormDialog` (add and edit), reusable table row action buttons.
 - **Display Formats:** Currency in ₱ with thousands separator and 2 decimals. Price effective dates shown as YYYY-MM-DD. Stamps shown as `CREATED|EDITED|DELETED user, date and time`.
 - **Status Behavior:** Active/Inactive/All tabs filter by status and show counts. Inactive records use red row highlighting in the product list and a Restore action.
-- **Not Yet Designed:** Delete confirmation, Restore confirmation, validation error states, and success/failure messages. Confirm with the team before development.
+- **Confirmation Buttons:** Delete confirmation, and Restore confirmation
