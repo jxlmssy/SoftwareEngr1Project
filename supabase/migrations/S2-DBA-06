@@ -1,0 +1,8 @@
+CREATE INDEX idx_customer_custname
+ON customer(custname);
+
+CREATE INDEX idx_product_description
+ON product(description);
+
+CREATE INDEX idx_pricehist_prodcode
+ON pricehist(prodcode);
