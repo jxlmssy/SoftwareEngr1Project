@@ -323,6 +323,64 @@ async function applyModuleAccess(role) {
             b.classList.toggle("active", b.dataset.dashboardPage === page));
         if (page === "users" && !usersLoaded) loadUsers();
         if (TABLE_PAGES[page] && !tablePagesLoaded[page]) loadTablePage(page);
+
+        if (page === "customers") loadCustomers(1);
+        let customerPage = 1, customerRequest = 0, customerTimer;
+const customerEl = id => document.getElementById(id);
+
+async function loadCustomers(page) {
+    const requestNo = ++customerRequest;   // lets us ignore out-of-order responses
+    const tbody = customerEl("customersTableBody");
+    const params = new URLSearchParams({
+        search: customerEl("customerSearch").value.trim(),
+        payterm: customerEl("customerPayterm").value,
+        status: customerEl("customerStatus").value,
+        page
+    });
+    const send = () => fetch(API + "/customer?" + params, {
+        headers: { Authorization: "Bearer " + sessionStorage.getItem("access_token") }
+    });
+    setTableState(tbody, "Loading...", 6);
+    customerEl("customerPrev").disabled = customerEl("customerNext").disabled = true;
+
+    try {
+        let res = await send();
+        if (res.status === 401 && await fetchMe()) res = await send(); // fetchMe refreshes the token
+        const data = await res.json();
+        if (requestNo !== customerRequest) return;
+        if (!res.ok) return setTableState(tbody, data.error || "Unable to load data.", 6);
+
+        customerPage = data.page;
+        const pages = Math.max(Math.ceil(data.total / data.pageSize), 1);
+        customerEl("customerPageInfo").textContent = `Page ${data.page} of ${pages} (${data.total} records)`;
+        customerEl("customerPrev").disabled = data.page <= 1;
+        customerEl("customerNext").disabled = data.page >= pages;
+
+        if (!data.rows.length) return setTableState(tbody, "No records found.", 6);
+        tbody.replaceChildren(...data.rows.map(c => {
+            const tr = document.createElement("tr");
+            tr.append(
+                createUserCell(c.custno), createUserCell(c.custname),
+                createUserCell(c.address), createUserCell(c.payterm),
+                statusCell(c.is_deleted ? "inactive" : "active"),
+                createUserCell(fmtStamp(c.stamp))
+            );
+            return tr;
+        }));
+    } catch (err) {
+        console.error("Load customers error:", err);
+        if (requestNo === customerRequest) setTableState(tbody, "Unable to connect to the server.", 6);
+    }
+}
+
+customerEl("customerSearch").addEventListener("input", () => {
+    clearTimeout(customerTimer);
+    customerTimer = setTimeout(() => loadCustomers(1), 300);
+});
+["customerPayterm", "customerStatus"].forEach(id =>
+    customerEl(id).addEventListener("change", () => loadCustomers(1)));
+customerEl("customerPrev").addEventListener("click", () => loadCustomers(customerPage - 1));
+customerEl("customerNext").addEventListener("click", () => loadCustomers(customerPage + 1));
     }
 
     // USER MANAGEMENT: small UI helpers

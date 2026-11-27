@@ -240,6 +240,9 @@ body { font-family: 'Inter Variable', 'Inter', sans-serif; background-color: #0b
     border: solid #fff; border-width: 0 2px 2px 0;
     transform: rotate(45deg) translate(-1px, -1px);
 }
+.list-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+.list-toolbar input, .list-toolbar select { padding: 8px 10px; background: #151929; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; }
+.list-toolbar input { flex: 1; min-width: 220px; }
 
 #rightsModal .primary-modal-btn { background: #171da2; min-height: 54px; }
 
