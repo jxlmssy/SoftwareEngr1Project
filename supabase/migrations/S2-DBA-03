@@ -1,0 +1,3 @@
+ALTER TABLE customer
+ADD CONSTRAINT payterm_ck
+CHECK (payterm IN ('COD', '30D', '45D'));
