@@ -758,8 +758,38 @@ app.post("/api/admin/users", requireAuth, requirePasswordSet, requireAdmin, asyn
  
     res.status(201).json({ message: "User created with " + status + " status." });
 });
- 
- 
+app.get("/api/customer", requireAuth, requirePasswordSet, requireModule(1), async (req, res) => {
+    // Quotes, backslashes and wildcards are removed so input can't alter the filter
+    const search = String(req.query.search || "").replace(/["\\%*]/g, "").trim().slice(0, 100);
+    const payterm = String(req.query.payterm || "");
+    const status = String(req.query.status || "active");
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const pageSize = 20;
+    const isAdmin = ["admin", "superadmin"].includes(req.profile.role);
+
+    let query = admin.from("customer_active")
+        .select("custno, custname, address, payterm, is_deleted, stamp", { count: "exact" });
+
+    // Regular users only ever see active customers
+    if (!isAdmin || status === "active") query = query.eq("is_deleted", false);
+    else if (status === "inactive") query = query.eq("is_deleted", true);
+
+    if (payterm) query = query.eq("payterm", payterm);
+    if (search) {
+        query = query.or(["custno", "custname", "address"]
+            .map(col => `${col}.ilike."%${search}%"`).join(","));
+    }
+
+    const from = (page - 1) * pageSize;
+    const { data, count, error } = await query.order("custno").range(from, from + pageSize - 1);
+    if (error) {
+        console.error("Customer list error:", error);
+        return res.status(500).json({ error: "Unable to load customers." });
+    }
+    res.json({ rows: data, total: count, page, pageSize });
+});
+
+
 // Start the server on port 3000
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Backend running at http://localhost:${PORT}`));
