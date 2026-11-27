@@ -1,0 +1,64 @@
+INSERT INTO customer
+(custno, custname, address, payterm)
+VALUES
+('C9999', 'Demo Customer', 'Demo Address', 'COD');
+
+INSERT INTO product
+(prodcode, description, unit)
+VALUES
+('ZZ9999', 'Demo Product', 'ea');
+
+INSERT INTO pricehist
+(effdate, prodcode, unitprice)
+VALUES
+('2026-01-01', 'ZZ9999', 100.00);
+
+AUDIT FIX
+
+CREATE OR REPLACE FUNCTION public.trg_audit_log()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO public
+AS $function$
+DECLARE
+    v_action text;
+BEGIN
+    IF tg_op = 'INSERT' THEN
+        v_action := 'ADD';
+    ELSIF tg_op = 'DELETE' THEN
+        v_action := 'DELETE';
+    ELSE
+        IF (old.is_deleted IS TRUE) AND (new.is_deleted IS NOT TRUE) THEN
+            v_action := 'RESTORE';
+        ELSIF (old.is_deleted IS NOT TRUE) AND (new.is_deleted IS TRUE) THEN
+            v_action := 'DELETE';
+        ELSE
+            v_action := 'EDIT';
+        END IF;
+    END IF;
+
+    INSERT INTO public.audit_log
+    (
+        table_name,
+        action,
+        record_key,
+        old_values,
+        new_values,
+        action_by,
+        action_at
+    )
+    VALUES
+    (
+        tg_table_name,
+        v_action,
+        'N/A',
+        CASE WHEN tg_op IN ('UPDATE','DELETE') THEN to_jsonb(old) END,
+        CASE WHEN tg_op IN ('INSERT','UPDATE') THEN to_jsonb(new) END,
+        COALESCE(auth.uid()::text, 'system'),
+        now()
+    );
+
+    RETURN COALESCE(new, old);
+END;
+$function$;
