@@ -1,0 +1,4 @@
+CREATE OR REPLACE VIEW customer_active AS
+SELECT *
+FROM customer
+WHERE is_deleted = FALSE;
