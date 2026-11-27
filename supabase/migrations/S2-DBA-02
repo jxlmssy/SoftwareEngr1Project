@@ -1,0 +1,10 @@
+-- Current price of a product as of a given date
+
+SELECT prodcode,
+       unitprice,
+       effdate
+FROM pricehist
+WHERE prodcode = 'PC0002'
+  AND effdate <= '2010-08-01'
+ORDER BY effdate DESC
+LIMIT 1;

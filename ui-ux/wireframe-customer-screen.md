@@ -1,5 +1,5 @@
 # Wireframes Customer Screen
-<img width="1965" height="914" alt="wireframe customers" src="https://github.com/user-attachments/assets/fd00a05e-6950-4821-83d8-534427dcc5b8" />
+<img width="1965" height="914" alt="wireframe customers" src="https://github.com/user-attachments/assets/9d405ba1-06e1-4725-8650-05b65a06c43c" />
 
 # Description
 This document outlines the wireframe design and UI structure for task **[S2-UIX-01]**. It establishes the Customer Management screen layout, including the customer data table, status filters, search, and row-level actions for the Hope, Inc. ERP system.

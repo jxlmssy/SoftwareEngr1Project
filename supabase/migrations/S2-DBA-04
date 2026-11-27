@@ -1,0 +1,7 @@
+UPDATE customer
+SET is_deleted = true
+WHERE custno = 'C0001';
+
+UPDATE product
+SET is_deleted = true
+WHERE prodcode = 'AK0002';
