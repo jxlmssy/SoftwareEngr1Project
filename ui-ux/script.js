@@ -875,6 +875,17 @@ customerEl("customerNext").addEventListener("click", () => loadCustomers(custome
     // Collapse / expand the dashboard sidebar
     document.getElementById("sidebarToggleBtn").addEventListener("click", () => dashboardView.querySelector(".dash-sidebar").classList.toggle("collapsed"));
 
+    // On phones and tablets the sidebar slides over the page, so it starts closed
+    // and closes again after picking a page or tapping outside it
+    const smallScreen = window.matchMedia("(max-width: 900px)");
+    const dashSidebar = document.getElementById("dashSidebar");
+    const closeSidebarOnSmallScreen = () => { if (smallScreen.matches) dashSidebar.classList.add("collapsed"); };
+    closeSidebarOnSmallScreen();
+    // Resizing: close it when the screen becomes small, show it again on desktop
+    smallScreen.addEventListener("change", () => dashSidebar.classList.toggle("collapsed", smallScreen.matches));
+    dashSidebar.addEventListener("click", e => { if (e.target.closest("[data-dashboard-page]")) closeSidebarOnSmallScreen(); });
+    dashboardView.querySelector(".dash-content").addEventListener("click", closeSidebarOnSmallScreen);
+
     // Logout: tell the server, clear local session data and state, return to landing page
     document.getElementById("logoutBtn").addEventListener("click", async () => {
         const token = sessionStorage.getItem("access_token");
