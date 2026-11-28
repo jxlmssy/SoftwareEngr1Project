@@ -790,7 +790,12 @@ app.get("/api/customer", requireAuth, requirePasswordSet, requireModule(1), asyn
 });
 
 
-// Start the server on port 3000
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Backend running at http://localhost:${PORT}`));
+// Export the app so other code (e.g. a serverless host or tests) can use it
+module.exports = app;
+
+// When run directly (npm start), start a normal server on port 3000
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`Backend running at http://localhost:${PORT}`));
+}
  
