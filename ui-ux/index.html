@@ -283,13 +283,30 @@
                 </section>
                  <section id="customersView" class="hidden" data-page-view="customers">
     <div class="management-heading">
-        <div>
-            <h1>Customers</h1>
-            <p>Client management, account tracking, and support history.</p>
-        </div>
+        <div><h1>Customers</h1><p>Search and filter the customer list.</p></div>
+    </div>
+    <div class="list-toolbar">
+        <input type="search" id="customerSearch" placeholder="Search number, name or address">
+        <select id="customerPayterm">
+            <option value="">All pay terms</option>
+            <option>COD</option><option>30D</option><option>45D</option> <!-- use your values -->
+        </select>
+        <select id="customerStatus">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive (admins)</option>
+            <option value="all">All (admins)</option>
+        </select>
     </div>
     <div class="users-table-wrap">
-        <p class="users-table-state">Coming soon.</p>
+        <table class="users-table">
+            <thead><tr><th>No.</th><th>Name</th><th>Address</th><th>Pay Term</th><th>Status</th><th>Stamp</th></tr></thead>
+            <tbody id="customersTableBody"></tbody>
+        </table>
+    </div>
+    <div class="list-toolbar">
+        <button type="button" class="user-action-btn" id="customerPrev">Previous</button>
+        <span id="customerPageInfo"></span>
+        <button type="button" class="user-action-btn" id="customerNext">Next</button>
     </div>
 </section>
 
