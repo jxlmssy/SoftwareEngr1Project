@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config(); // loads SUPABASE_* keys from the .env file
+// Loads SUPABASE_* keys from backend/.env, no matter which folder the server is
+// started from. If the file is missing (e.g. on a host), real env vars are used.
+require("dotenv").config({ path: require("path").join(__dirname, ".env") });
  
 const { createClient } = require("@supabase/supabase-js");
  
