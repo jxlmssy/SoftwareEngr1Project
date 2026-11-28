@@ -1,0 +1,16 @@
+{
+  "name": "softwareengr1project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Group project for the course Software Engineering 1 (root package used by Vercel deployment)",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0"
+  }
+}
