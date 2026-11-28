@@ -267,3 +267,76 @@ body { font-family: 'Inter Variable', 'Inter', sans-serif; background-color: #0b
     .brand-title { font-size: 13px; }
     .dash-page-title { font-size: 13px; }
 }
+
+/* ===================== Responsive: tablets and phones ===================== */
+/* Desktop (wider than 1200px) is unchanged. Rules below only apply to smaller screens. */
+
+/* Laptops and tablets: shrink the 1-inch side padding on the landing page */
+@media (max-width: 1200px) {
+    #landingView { padding-left: 32px; padding-right: 32px; }
+    #landingView .navbar { margin-left: -32px; margin-right: -32px; padding-left: 32px; padding-right: 32px; }
+}
+
+/* Tablets and phones */
+@media (max-width: 900px) {
+    /* Landing page */
+    .hero-section { gap: 28px; margin-bottom: 48px; }
+    .hero-description { max-width: none; }
+    .features-section-split { gap: 24px; margin-top: 16px; }
+    .features-text-right { text-align: center; }
+    .features-carousel-left { overflow: hidden; }
+
+    /* Dashboard: the sidebar slides over the page instead of squeezing it */
+    .dash-navbar { position: sticky; top: 0; z-index: 950; }
+    .dash-sidebar {
+        position: fixed; top: 64px; left: 0; bottom: 0; z-index: 900;
+        overflow-y: auto; box-shadow: 8px 0 24px rgba(0, 0, 0, 0.45);
+    }
+    .dash-content { min-width: 0; }
+    .user-chip #dashUserName { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* Phones */
+@media (max-width: 560px) {
+    /* Landing page */
+    #landingView { padding-left: 0; padding-right: 0; }
+    #landingView .navbar { margin-left: 0; margin-right: 0; padding: 12px 16px; }
+    .nav-auth-buttons { gap: 8px; }
+    .btn-nav-signin, .btn-nav-register { padding: 8px 12px; }
+    .landing-page { padding-top: 28px; }
+    .hero-title { font-size: 32px; }
+    .hero-actions button { flex: 1 1 auto; }
+    .features-text-right h2 { font-size: 24px; }
+
+    /* Smaller carousel so the side cards fit on the screen */
+    .coverflow-stage { height: 260px; }
+    .coverflow-card { width: 190px; height: 220px; padding: 18px; }
+    .coverflow-card.pos--1 { transform: translateX(-80px) scale(0.78) rotateY(25deg); }
+    .coverflow-card.pos-1 { transform: translateX(80px) scale(0.78) rotateY(-25deg); }
+
+    /* Dashboard top bar: keep only the logo, toggle, page title, role and logout */
+    .dash-navbar .brand-title { display: none; }
+    .dash-nav-right { gap: 8px; }
+    .user-chip { padding: 5px 8px; }
+    .user-chip > svg, .user-chip #dashUserName { display: none; }
+    .welcome-banner { justify-content: flex-start; margin-bottom: 20px; }
+    .dash-card-stat { font-size: 28px; }
+
+    /* Search and filters stack full width */
+    .list-toolbar input, .list-toolbar select { flex: 1 1 100%; min-width: 0; }
+
+    /* Modals: first/last name stack, and inputs use 16px so iPhones don't zoom in */
+    .edit-user-name-fields { grid-template-columns: 1fr; gap: 0; }
+    .form-group input, .edit-user-name-fields input, #editUserForm select, #addUserForm select,
+    .list-toolbar input, .list-toolbar select { font-size: 16px; }
+    .modal-title-main { font-size: 22px; }
+    .modal-card { max-height: 92dvh; }
+}
+
+/* Very small phones (e.g. iPhone SE, 320-375px) */
+@media (max-width: 380px) {
+    .brand-title { font-size: 14px; }
+    .modules-grid { grid-template-columns: 1fr; }
+    .rights-options.cols-3, .rights-options.cols-2 { grid-template-columns: 1fr; }
+    .form-options { flex-wrap: wrap; gap: 8px; }
+}
