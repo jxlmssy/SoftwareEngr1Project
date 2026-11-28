@@ -80,6 +80,16 @@ async function requireAuth(req, res, next) {
     req.profile = result.profile;
     next();
 }
+
+async function loadCurrentAuthUser(req, res) {
+    const { data, error } = await admin.auth.admin.getUserById(req.user.id);
+    if (error || !data.user) {
+        console.error("Current user permissions error:", error);
+        res.status(500).json({ error: "Unable to verify user permissions." });
+        return null;
+    }
+    return data.user;
+}
  
 // Blocks access until the user has replaced their temporary password
 function requirePasswordSet(req, res, next) {
@@ -143,8 +153,11 @@ function allowedModules(authUser, profile) {
  
 // Blocks the route unless the given module is enabled for this user
 function requireModule(moduleId) {
-    return (req, res, next) => {
-        if (!allowedModules(req.user, req.profile).includes(moduleId)) {
+    return async (req, res, next) => {
+        const authUser = await loadCurrentAuthUser(req, res);
+        if (!authUser) return;
+        req.user = authUser;
+        if (!allowedModules(authUser, req.profile).includes(moduleId)) {
             return res.status(403).json({ error: "You do not have access to this module." });
         }
         next();
@@ -152,19 +165,20 @@ function requireModule(moduleId) {
 }
  
 // Stricter than requireModule: the module must be visible AND the specific
-// right (e.g. "customer_add") must be granted. Admins skip the right check.
-// The right name is looked up in rights_catalogue to get its id, then compared
-// with the user's saved permissions in app_metadata.permissions.
-// (Defined here but not currently used by any route in this file.)
+// right (e.g. "customer_add") must be granted.
+// The right name is looked up in rights_catalogue and compared with the
+// user's saved permissions in app_metadata.permissions.
 function requireRight(moduleId, rightName) {
     return async (req, res, next) => {
-        if (!allowedModules(req.user, req.profile).includes(moduleId)) {
+        const authUser = await loadCurrentAuthUser(req, res);
+        if (!authUser) return;
+        req.user = authUser;
+        if (!allowedModules(authUser, req.profile).includes(moduleId)) {
             return res.status(403).json({ error: "You do not have access to this module." });
         }
-        if (["admin", "superadmin"].includes(req.profile.role)) return next();
         const { data, error } = await admin.from("rights_catalogue").select("right_id")
             .eq("right_name", rightName).eq("is_deleted", false).maybeSingle();
-        const perms = (req.user.app_metadata && req.user.app_metadata.permissions) || [];
+        const perms = (authUser.app_metadata && authUser.app_metadata.permissions) || [];
         if (error || !data || !perms.some(p => Number(p.module_id) === moduleId && Number(p.right_id) === Number(data.right_id))) {
             return res.status(403).json({ error: "You do not have permission to do this." });
         }
@@ -375,9 +389,42 @@ app.post("/api/reset-password", async (req, res) => {
 
 // LOGGED-IN USER ROUTES
  
-// Returns the current user's profile plus the modules they can access
-app.get("/api/me", requireAuth, (req, res) => {
-    res.json({ user: { ...req.profile, modules: allowedModules(req.user, req.profile) } });
+// Returns the current user's profile, accessible modules, and assigned rights.
+app.get("/api/me", requireAuth, async (req, res) => {
+    const authUser = await loadCurrentAuthUser(req, res);
+    if (!authUser) return;
+    const savedPermissions = Array.isArray(authUser.app_metadata?.permissions)
+        ? authUser.app_metadata.permissions.filter(permission => permission && typeof permission === "object")
+        : [];
+    const rightIds = [...new Set(savedPermissions.map(permission => Number(permission.right_id))
+        .filter(rightId => Number.isSafeInteger(rightId) && rightId > 0))];
+    let permissions = [];
+
+    if (rightIds.length) {
+        const { data, error } = await admin.from("rights_catalogue")
+            .select("right_id, right_name")
+            .in("right_id", rightIds)
+            .eq("is_deleted", false);
+        if (error) {
+            console.error("Current user rights error:", error);
+            return res.status(500).json({ error: "Unable to load user permissions." });
+        }
+
+        const savedRights = new Set(savedPermissions.map(permission =>
+            `${Number(permission.module_id)}:${Number(permission.right_id)}`
+        ));
+        permissions = (data || [])
+            .filter(right => savedRights.has(`1:${Number(right.right_id)}`))
+            .map(right => right.right_name);
+    }
+
+    res.json({
+        user: {
+            ...req.profile,
+            modules: allowedModules(authUser, req.profile),
+            permissions
+        }
+    });
 });
  
 // Set a new password (used for the forced first-login change) and clear the
@@ -788,9 +835,32 @@ app.get("/api/customer", requireAuth, requirePasswordSet, requireModule(1), asyn
     }
     res.json({ rows: data, total: count, page, pageSize });
 });
+const text = v => (typeof v === "string" ? v.trim() : "");
 
+app.post("/api/customer", requireAuth, requirePasswordSet, requireRight(1, "customer_add"), async (req, res) => {
+    const row = {
+        custno: text(req.body.custno), custname: text(req.body.custname),
+        address: text(req.body.address), payterm: text(req.body.payterm)
+    };
+    if (Object.values(row).some(v => !v)) return res.status(400).json({ error: "All fields are required." });
+
+    const { error } = await admin.from("customer").insert({ ...row, is_deleted: false });
+    if (error) return res.status(400).json({ error: error.code === "23505" ? "That customer number already exists." : "Unable to add customer." });
+    res.status(201).json({ message: "Customer added." });
+});
+
+app.put("/api/customer/:custno", requireAuth, requirePasswordSet, requireRight(1, "customer_edit"), async (req, res) => {
+    const changes = {
+        custname: text(req.body.custname), address: text(req.body.address), payterm: text(req.body.payterm)
+    };
+    if (Object.values(changes).some(v => !v)) return res.status(400).json({ error: "All fields are required." });
+
+    const { data, error } = await admin.from("customer").update(changes)
+        .eq("custno", req.params.custno).select("custno");
+    if (error || !data.length) return res.status(400).json({ error: "Unable to update customer." });
+    res.json({ message: "Customer updated." });
+});
 
 // Start the server on port 3000
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Backend running at http://localhost:${PORT}`));
- 

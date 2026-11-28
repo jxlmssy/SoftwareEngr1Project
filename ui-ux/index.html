@@ -281,25 +281,29 @@
                         </table>
                     </div>
                 </section>
-                 <section id="customersView" class="hidden" data-page-view="customers">
+                <section id="customersView" class="hidden" data-page-view="customers">
     <div class="management-heading">
-        <div><h1>Customers</h1><p>Search and filter the customer list.</p></div>
-    </div>
-    <div class="list-toolbar">
-        <input type="search" id="customerSearch" placeholder="Search number, name or address">
-        <select id="customerPayterm">
-            <option value="">All pay terms</option>
-            <option>COD</option><option>30D</option><option>45D</option> <!-- use your values -->
-        </select>
-        <select id="customerStatus">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive (admins)</option>
-            <option value="all">All (admins)</option>
-        </select>
+        <div>
+            <h1>Customer Management</h1>
+            <p>Client management, account tracking, and support history.</p>
+        </div>
+        <div class="customer-controls">
+            <select id="customerPayterm">
+                <option value="">All pay terms</option>
+                <option>COD</option><option>30D</option><option>45D</option>
+            </select>
+            <select id="customerStatus">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive (admins)</option>
+                <option value="all">All (admins)</option>
+            </select>
+            <input type="search" id="customerSearch" placeholder="🔍 Search customer...">
+            <button type="button" class="customer-add-btn hidden" id="addCustomerBtn">+ Add Customer</button>
+        </div>
     </div>
     <div class="users-table-wrap">
         <table class="users-table">
-            <thead><tr><th>No.</th><th>Name</th><th>Address</th><th>Pay Term</th><th>Status</th><th>Stamp</th></tr></thead>
+            <thead><tr><th>No.</th><th>Name</th><th>Address</th><th>Pay Term</th><th>Status</th><th>Stamp</th><th id="customerActionHeader" class="hidden">Action</th></tr></thead>
             <tbody id="customersTableBody"></tbody>
         </table>
     </div>
@@ -309,7 +313,6 @@
         <button type="button" class="user-action-btn" id="customerNext">Next</button>
     </div>
 </section>
-
 <section id="productsView" class="hidden" data-page-view="products">
     <div class="management-heading">
         <div>
@@ -361,7 +364,25 @@
         </div>
     </div>
 
-
+<div class="modal-overlay hidden" id="customerModal">
+    <div class="modal-card">
+        <button type="button" class="modal-close-btn" id="closeCustomerBtn">&times;</button>
+        <h2 class="modal-title-main" id="customerModalTitle"></h2>
+        <p class="modal-subtitle" id="customerModalSubtitle"></p>
+        <form id="customerForm">
+            <div class="form-group"><label for="custNo">Customer Number</label>
+                <input type="text" id="custNo" placeholder="e.g. C0001" required></div>
+            <div class="form-group"><label for="custName">Customer Name</label>
+                <input type="text" id="custName" placeholder="Enter company or person name" required></div>
+            <div class="form-group"><label for="custAddress">Address</label>
+                <input type="text" id="custAddress" placeholder="Enter full address" required></div>
+            <div class="form-group"><label for="custPayterm">Payment Terms</label>
+                <input type="text" id="custPayterm" placeholder="e.g. 45D, COD, Prepaid" required></div>
+            <button type="submit" class="primary-modal-btn" id="customerSubmitBtn"></button>
+            <p class="form-message error" id="customerMessage"></p>
+        </form>
+    </div>
+</div>
     <div class="modal-overlay hidden" id="addUserModal">
         <div class="modal-card">
             <button type="button" class="modal-close-btn" id="closeAddUserBtn" aria-label="Close">&times;</button>

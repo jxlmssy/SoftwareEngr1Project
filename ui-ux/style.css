@@ -244,6 +244,14 @@ body { font-family: 'Inter Variable', 'Inter', sans-serif; background-color: #0b
 .list-toolbar input, .list-toolbar select { padding: 8px 10px; background: #151929; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; }
 .list-toolbar input { flex: 1; min-width: 220px; }
 
+.customer-heading { align-items: center; flex-wrap: wrap; }
+.customer-controls { margin-left: auto; }
+.customer-controls #customerSearch { width: 200px; }
+
+.customer-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.customer-controls select, .customer-controls input { height: 38px; padding: 0 10px; background: #151929; color: #fff; border: 1px solid #334155; border-radius: 6px; }
+.customer-add-btn { height: 38px; padding: 0 14px; border: 0; border-radius: 6px; background: #171da2; color: #fff; font-weight: 700; cursor: pointer; }
+
 #rightsModal .primary-modal-btn { background: #171da2; min-height: 54px; }
 
 @media (max-width: 560px) {

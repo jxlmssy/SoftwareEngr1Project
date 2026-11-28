@@ -24,9 +24,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const userManagementFeedback = document.getElementById("userManagementFeedback");
     const addUserModal = document.getElementById("addUserModal");
     const editUserModal = document.getElementById("editUserModal");
+    const customerEl = id => document.getElementById(id);
 
     // Dashboard state 
     let currentUserRole = "user";   // "user" | "admin" | "superadmin"
+    let currentUserRights = new Set();
+    let currentUserModules = new Set();
     let usersLoaded = false;        // true once the users table has been fetched (avoids refetching)
     let usersById = new Map();      // lookup of users by id, used by the Edit/Rights buttons
 
@@ -122,7 +125,10 @@ document.addEventListener("DOMContentLoaded", function () {
         let token = sessionStorage.getItem("access_token");
         if (!token) return null;
 
-        let res = await fetch(API + "/me", { headers: { Authorization: "Bearer " + token } });
+        let res = await fetch(API + "/me", {
+            headers: { Authorization: "Bearer " + token },
+            cache: "no-store"
+        });
 
         if (res.status === 401) {
             const refresh = sessionStorage.getItem("refresh_token");
@@ -131,7 +137,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!r.ok) return null;
             saveSession(r.data);
             token = r.data.access_token;
-            res = await fetch(API + "/me", { headers: { Authorization: "Bearer " + token } });
+            res = await fetch(API + "/me", {
+                headers: { Authorization: "Bearer " + token },
+                cache: "no-store"
+            });
         }
 
         if (!res.ok) return null;
@@ -251,15 +260,33 @@ document.addEventListener("DOMContentLoaded", function () {
 async function applyModuleAccess(role) {
     const isAdmin = ["admin", "superadmin"].includes(role);
     let modules = [];
+    currentUserRights = new Set();
+    currentUserModules = new Set();
+    updateCustomerActionVisibility();
     if (!isAdmin) {
-        const me = await fetchMe();
-        modules = (me && me.modules) || [];
-
+        document.querySelectorAll("[data-module-access]").forEach(el => el.classList.add("hidden"));
     }
+    const me = await fetchMe();
+    modules = isAdmin ? [1, 2, 3, 4, 5] : (me && me.modules) || [];
+    currentUserRights = new Set((me && me.permissions) || []);
     const allowed = new Set(modules.map(Number));
+    currentUserModules = allowed;
     document.querySelectorAll("[data-module-access]").forEach(el => {
         el.classList.toggle("hidden", !(isAdmin || allowed.has(Number(el.dataset.moduleAccess))));
     });
+    updateCustomerActionVisibility();
+    return isAdmin || allowed.has(1);
+}
+
+function canUseCustomerRight(right) {
+    return currentUserRights.has(right);
+}
+
+function updateCustomerActionVisibility() {
+    customerEl("addCustomerBtn").classList.toggle("hidden", !canUseCustomerRight("customer_add"));
+    customerEl("customerActionHeader").classList.toggle("hidden", !canUseCustomerRight("customer_edit"));
+    customerEl("customersTableBody").querySelectorAll(".customer-edit-action")
+        .forEach(action => action.classList.toggle("hidden", !canUseCustomerRight("customer_edit")));
 }
 
     // DASHBOARD NAVIGATION
@@ -314,7 +341,21 @@ async function applyModuleAccess(role) {
 
     // Show one dashboard page and hide the others; update the title and the
     // active sidebar button; lazily load data the first time a page is opened.
-    function showDashboardPage(page) {
+    function showDashboardPage(page, customerAccessChecked) {
+       if (page === "customers" && !customerAccessChecked) {
+            customerEl("customersView").classList.add("hidden");
+            applyModuleAccess(currentUserRole).then(canViewCustomers => {
+                showDashboardPage(canViewCustomers ? "customers" : "dashboard", true);
+            }).catch(error => {
+                console.error("Refresh customer permissions error:", error);
+                currentUserRights = new Set();
+                currentUserModules = new Set();
+                updateCustomerActionVisibility();
+                showDashboardPage("dashboard", true);
+            });
+            return;
+        }
+        if (page === "customers" && !currentUserModules.has(1)) page = "dashboard";
        if (!canViewPage(page)) page = "dashboard"; // fall back if not permitted
         document.querySelectorAll("[data-page-view]").forEach(el =>
             el.classList.toggle("hidden", el.dataset.pageView !== page));
@@ -325,11 +366,16 @@ async function applyModuleAccess(role) {
         if (TABLE_PAGES[page] && !tablePagesLoaded[page]) loadTablePage(page);
 
         if (page === "customers") loadCustomers(1);
-        let customerPage = 1, customerRequest = 0, customerTimer;
-const customerEl = id => document.getElementById(id);
+    }
+
+    let customerPage = 1, customerTimer, customerRequest = 0, editingCustno = null;
+const customerHeaders = () => ({
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + sessionStorage.getItem("access_token")
+});
 
 async function loadCustomers(page) {
-    const requestNo = ++customerRequest;   // lets us ignore out-of-order responses
+    const requestNo = ++customerRequest;
     const tbody = customerEl("customersTableBody");
     const params = new URLSearchParams({
         search: customerEl("customerSearch").value.trim(),
@@ -337,42 +383,100 @@ async function loadCustomers(page) {
         status: customerEl("customerStatus").value,
         page
     });
-    const send = () => fetch(API + "/customer?" + params, {
-        headers: { Authorization: "Bearer " + sessionStorage.getItem("access_token") }
-    });
-    setTableState(tbody, "Loading...", 6);
-    customerEl("customerPrev").disabled = customerEl("customerNext").disabled = true;
-
+    setTableState(tbody, "Loading...", 7);
     try {
-        let res = await send();
-        if (res.status === 401 && await fetchMe()) res = await send(); // fetchMe refreshes the token
+        const res = await fetch(API + "/customer?" + params, { headers: customerHeaders() });
         const data = await res.json();
         if (requestNo !== customerRequest) return;
-        if (!res.ok) return setTableState(tbody, data.error || "Unable to load data.", 6);
+        if (!res.ok) return setTableState(tbody, data.error || "Unable to load data.", 7);
 
         customerPage = data.page;
         const pages = Math.max(Math.ceil(data.total / data.pageSize), 1);
-        customerEl("customerPageInfo").textContent = `Page ${data.page} of ${pages} (${data.total} records)`;
+        customerEl("customerPageInfo").textContent = `Page ${data.page} of ${pages}`;
         customerEl("customerPrev").disabled = data.page <= 1;
         customerEl("customerNext").disabled = data.page >= pages;
+        if (!data.rows.length) return setTableState(tbody, "No records found.", 7);
 
-        if (!data.rows.length) return setTableState(tbody, "No records found.", 6);
         tbody.replaceChildren(...data.rows.map(c => {
             const tr = document.createElement("tr");
+            const action = document.createElement("td");
+            action.className = "customer-edit-action";
+            if (canUseCustomerRight("customer_edit")) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "user-action-btn";
+                btn.textContent = "Edit ✎";
+                btn.addEventListener("click", () => openCustomerModal(c));
+                action.append(btn);
+            } else {
+                action.classList.add("hidden");
+            }
             tr.append(
                 createUserCell(c.custno), createUserCell(c.custname),
                 createUserCell(c.address), createUserCell(c.payterm),
                 statusCell(c.is_deleted ? "inactive" : "active"),
-                createUserCell(fmtStamp(c.stamp))
+                createUserCell(fmtStamp(c.stamp)), action
             );
             return tr;
         }));
     } catch (err) {
         console.error("Load customers error:", err);
-        if (requestNo === customerRequest) setTableState(tbody, "Unable to connect to the server.", 6);
+        setTableState(tbody, "Unable to connect to the server.", 7);
     }
 }
 
+// No customer = Add form; with a customer = Edit form
+function openCustomerModal(c) {
+    if (c ? !canUseCustomerRight("customer_edit") : !canUseCustomerRight("customer_add")) return;
+    editingCustno = c ? c.custno : null;
+    customerEl("customerForm").reset();
+    customerEl("customerMessage").textContent = "";
+    customerEl("customerModalTitle").textContent = c ? "Edit Customer" : "Add Customer";
+    customerEl("customerModalSubtitle").textContent = c
+        ? "To edit customer's details, fill out the following."
+        : "To add customer, fill out the following.";
+    customerEl("customerSubmitBtn").textContent = c ? "Update edit" : "Save edit";
+    customerEl("custNo").readOnly = Boolean(c);
+    if (c) {
+        customerEl("custNo").value = c.custno;
+        customerEl("custName").value = c.custname || "";
+        customerEl("custAddress").value = c.address || "";
+        customerEl("custPayterm").value = c.payterm || "";
+    }
+    customerEl("customerModal").classList.remove("hidden");
+}
+
+customerEl("customerForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const submit = customerEl("customerSubmitBtn");
+    submit.disabled = true;
+    try {
+        const res = await fetch(API + "/customer" + (editingCustno ? "/" + encodeURIComponent(editingCustno) : ""), {
+            method: editingCustno ? "PUT" : "POST",
+            headers: customerHeaders(),
+            body: JSON.stringify({
+                custno: customerEl("custNo").value,
+                custname: customerEl("custName").value,
+                address: customerEl("custAddress").value,
+                payterm: customerEl("custPayterm").value
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            customerEl("customerMessage").textContent = data.error || "Unable to save.";
+            return;
+        }
+        customerEl("customerModal").classList.add("hidden");
+        loadCustomers(editingCustno ? customerPage : 1);
+    } catch (err) {
+        customerEl("customerMessage").textContent = "Unable to connect to the server.";
+    } finally {
+        submit.disabled = false;
+    }
+});
+
+customerEl("addCustomerBtn").addEventListener("click", () => openCustomerModal());
+customerEl("closeCustomerBtn").addEventListener("click", () => customerEl("customerModal").classList.add("hidden"));
 customerEl("customerSearch").addEventListener("input", () => {
     clearTimeout(customerTimer);
     customerTimer = setTimeout(() => loadCustomers(1), 300);
@@ -381,7 +485,6 @@ customerEl("customerSearch").addEventListener("input", () => {
     customerEl(id).addEventListener("change", () => loadCustomers(1)));
 customerEl("customerPrev").addEventListener("click", () => loadCustomers(customerPage - 1));
 customerEl("customerNext").addEventListener("click", () => loadCustomers(customerPage + 1));
-    }
 
     // USER MANAGEMENT: small UI helpers
 
@@ -887,6 +990,12 @@ customerEl("customerNext").addEventListener("click", () => loadCustomers(custome
 
     // Sidebar buttons switch dashboard pages
     document.querySelectorAll("[data-dashboard-page]").forEach(b =>b.addEventListener("click", () => showDashboardPage(b.dataset.dashboardPage)));
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && !dashboardView.classList.contains("hidden") &&
+            !customerEl("customersView").classList.contains("hidden")) {
+            showDashboardPage("customers");
+        }
+    });
 
     // One delegated click handler for every action button in the users table
     usersTableBody.addEventListener("click", event => {
@@ -1597,7 +1706,8 @@ async function openRightsModal(userId, userName) {
     Authorization: "Bearer " + sessionStorage.getItem("access_token")
 },
                 body: JSON.stringify({
-    permissions: getRights()
+    permissions: getRights(),
+    modules: getModules()
 })
             });
             let data = {};
@@ -1607,6 +1717,9 @@ async function openRightsModal(userId, userName) {
                 return;
             }
             showMessage(data.message || "Rights saved.", false);
+            if (currentUserId === sessionStorage.getItem("user_id")) {
+                await applyModuleAccess(currentUserRole);
+            }
             setTimeout(closeRightsModal, 700);
         } catch (err) {
             console.error("Save rights error:", err);
